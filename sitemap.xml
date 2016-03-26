@@ -2,6 +2,11 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   
   <url>
+    <loc>http://blog.linjiajun.com/books/index.html</loc>
+    <lastmod>2016-03-26T16:28:13.040Z</lastmod>
+  </url>
+  
+  <url>
     <loc>http://blog.linjiajun.com/about/index.html</loc>
     <lastmod>2016-03-26T08:43:08.217Z</lastmod>
   </url>
