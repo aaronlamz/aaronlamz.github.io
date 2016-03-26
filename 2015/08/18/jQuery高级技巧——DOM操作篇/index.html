@@ -1,0 +1,518 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  <title>jQuery高级技巧——DOM操作篇 | 燎原之火的博客 | Lyzh&#39;s blog</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="description" content="&amp;nbsp;
+
+页面加载之DOMReady事件所谓domReady,也就是文档就绪，我们都知道，在操作dom时必须要在dom树加载完成后才能进行操作。如何检测DOM树已经构建完成，以下是一些实现的方式：">
+<meta property="og:type" content="article">
+<meta property="og:title" content="jQuery高级技巧——DOM操作篇">
+<meta property="og:url" content="http://blog.linjiajun.com/2015/08/18/jQuery高级技巧——DOM操作篇/index.html">
+<meta property="og:site_name" content="燎原之火的博客 | Lyzh's blog">
+<meta property="og:description" content="&amp;nbsp;
+
+页面加载之DOMReady事件所谓domReady,也就是文档就绪，我们都知道，在操作dom时必须要在dom树加载完成后才能进行操作。如何检测DOM树已经构建完成，以下是一些实现的方式：">
+<meta property="og:updated_time" content="2016-03-26T05:37:49.845Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="jQuery高级技巧——DOM操作篇">
+<meta name="twitter:description" content="&amp;nbsp;
+
+页面加载之DOMReady事件所谓domReady,也就是文档就绪，我们都知道，在操作dom时必须要在dom树加载完成后才能进行操作。如何检测DOM树已经构建完成，以下是一些实现的方式：">
+  
+    <link rel="alternative" href="/atom.xml" title="燎原之火的博客 | Lyzh&#39;s blog" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.ico">
+  
+  <link rel="stylesheet" href="/css/style.css" type="text/css">
+  <link rel="stylesheet" href="/font-awesome/css/font-awesome.min.css">
+  <link rel="apple-touch-icon" href="/apple-touch-icon.png">
+</head>
+<body>
+  <div id="container">
+    <div class="left-col">
+    <div class="overlay"></div>
+<div class="intrude-less">
+	<header id="header" class="inner">
+		<a href="/" class="profilepic">
+			
+			<img lazy-src="/avatar.jpg" class="js-avatar">
+			
+		</a>
+
+		<hgroup>
+		  <h1 class="header-author"><a href="/">Lyzh</a></h1>
+		</hgroup>
+
+		
+		<p class="header-subtitle">燎原之火</p>
+		
+				
+
+
+		
+
+		<div id="switch-area" class="switch-area">
+			<div class="switch-wrap">
+				<section class="switch-part switch-part1">
+					<nav class="header-menu">
+						<ul>
+						
+							<li><a href="/">主页</a></li>
+				        
+							<li><a href="/archives/">所有文章</a></li>
+				        
+							<li><a href="/categories/读书/">读书</a></li>
+				        
+							<li><a href="/about/">关于我</a></li>
+				        
+						</ul>
+					</nav>
+					<nav class="header-nav">
+						<ul class="social">
+							
+								<li id="Email"><a class="Email" target="_blank" href="mailto:hi@linjiajun.com" title="Email"></a></li>
+					        
+								<li id="新浪微博"><a class="新浪微博" target="_blank" href="http://weibo.com/qylinxia" title="新浪微博"></a></li>
+					        
+								<li id="GitHub"><a class="GitHub" target="_blank" href="https://github.com/Lyzh" title="GitHub"></a></li>
+					        
+								<li id="RSS"><a class="RSS" target="_blank" href="/atom.xml" title="RSS"></a></li>
+					        
+						</ul>
+					</nav>
+				</section>
+				
+				
+				
+				
+				<section class="switch-part switch-part3">
+					<div id="js-friends">
+					
+			          <a target="_blank" class="main-nav-link switch-friends-link" href="http://www.cnblogs.com/bigboyLin/">我的技术博客</a>
+			        
+			          <a target="_blank" class="main-nav-link switch-friends-link" href="http://www.cnblogs.com/bigboyLin/">我的前端实验室</a>
+			        
+			        </div>
+				</section>
+				
+
+				
+				
+				<section class="switch-part switch-part4">
+				
+					<div id="js-aboutme">前端攻城狮一枚、初级跑步者、书虫</div>
+				</section>
+				
+			</div>
+		</div>
+	</header>				
+</div>
+    </div>
+    <div class="mid-col">
+      <nav id="mobile-nav">
+  	<div class="overlay">
+  		<div class="slider-trigger"></div>
+  		<h1 class="header-author js-mobile-header hide"><a href="/" title="回到主页">Lyzh</a></h1>
+  	</div>
+	<div class="intrude-less">
+		<header id="header" class="inner">
+			<a href="/" class="profilepic">
+				<img lazy-src="/avatar.jpg" class="js-avatar">
+			</a>
+			<hgroup>
+			  <h1 class="header-author"><a href="/" title="回到主页">Lyzh</a></h1>
+			</hgroup>
+			
+			<p class="header-subtitle">燎原之火</p>
+			
+			<nav class="header-menu">
+				<ul>
+				
+					<li><a href="/">主页</a></li>
+		        
+					<li><a href="/archives/">所有文章</a></li>
+		        
+					<li><a href="/categories/读书/">读书</a></li>
+		        
+					<li><a href="/about/">关于我</a></li>
+		        
+		        <div class="clearfix"></div>
+				</ul>
+			</nav>
+			<nav class="header-nav">
+						<ul class="social">
+							
+								<li id="Email"><a class="Email" target="_blank" href="mailto:hi@linjiajun.com" title="Email"></a></li>
+					        
+								<li id="新浪微博"><a class="新浪微博" target="_blank" href="http://weibo.com/qylinxia" title="新浪微博"></a></li>
+					        
+								<li id="GitHub"><a class="GitHub" target="_blank" href="https://github.com/Lyzh" title="GitHub"></a></li>
+					        
+								<li id="RSS"><a class="RSS" target="_blank" href="/atom.xml" title="RSS"></a></li>
+					        
+						</ul>
+			</nav>
+		</header>				
+	</div>
+</nav>
+      <div class="body-wrap"><article id="post-jQuery高级技巧——DOM操作篇" class="article article-type-post" itemscope itemprop="blogPost">
+  
+    <div class="article-meta">
+      <a href="/2015/08/18/jQuery高级技巧——DOM操作篇/" class="article-date">
+  	<time datetime="2015-08-18T15:30:00.000Z" itemprop="datePublished">2015-08-18</time>
+</a>
+    </div>
+  
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="article-title" itemprop="name">
+      jQuery高级技巧——DOM操作篇
+    </h1>
+  
+
+      </header>
+      
+      <div class="article-info article-info-post">
+        
+
+        
+        <div class="clearfix"></div>
+      </div>
+      
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+          
+        <div id="catalogBox">&nbsp;</div>
+
+<h2 id="u9875_u9762_u52A0_u8F7D_u4E4BDOMReady_u4E8B_u4EF6"><a href="#u9875_u9762_u52A0_u8F7D_u4E4BDOMReady_u4E8B_u4EF6" class="headerlink" title="页面加载之DOMReady事件"></a>页面加载之DOMReady事件</h2><p>所谓domReady,也就是文档就绪，我们都知道，在操作dom时必须要在dom树加载完成后才能进行操作。如何检测DOM树已经构建完成，以下是一些实现的方式：<br><a id="more"></a><br>1.使用jQuery：</p>
+<div class="cnblogs_code"><br><pre><span style="color: #008000;">//</span><span style="color: #008000;"> with jQuery</span><br>$(document).ready(<span style="color: #0000ff;">function</span>(){ <span style="color: #008000;">/<em></em></span><span style="color: #008000;"> … </span><span style="color: #008000;">/</span><span style="color: #000000;"> });<br></span><span style="color: #008000;">//</span><span style="color: #008000;"> shorter jQuery version</span><br>$(<span style="color: #0000ff;">function</span>(){ <span style="color: #008000;">/<em></em></span><span style="color: #008000;"> … </span><span style="color: #008000;">/</span> });</pre><br></div>
+
+<p>2.监听DOMContentLoaded事件,DOM 树创建完成后会触发,不支持IE10以下版本。</p>
+<div class="cnblogs_code"><br><pre><span style="color: #008000;">//</span><span style="color: #008000;"> without jQuery (doesn’t work in older IEs)</span><br>document.addEventListener(‘DOMContentLoaded’, <span style="color: #0000ff;">function</span><span style="color: #000000;">(){<br></span><span style="color: #008000;">//</span><span style="color: #008000;"> your code goes here</span><br>}, <span style="color: #0000ff;">false</span>);</pre><br></div>
+
+<p>3.监听readyState状态，可实现跨浏览器</p>
+<p>readyState 的状态属性：</p>
+<ul>
+<li>“uninitialized” &ndash; 原始状态</li>
+<li>“loading” &ndash; 下载数据中</li>
+<li>“loaded” &ndash; 下载完成</li>
+<li>“interactive” &ndash; 还未执行完毕</li>
+<li>“complete” &ndash; 脚本执行完毕<div class="cnblogs_code"><br><pre>r(<span style="color: #0000ff;">function</span><span style="color: #000000;">(){<br>alert(</span>‘DOM Ready!’<span style="color: #000000;">);<br>});<br></span><span style="color: #0000ff;">function</span> r(f){/in/.test(document.readyState)?setTimeout(‘r(‘+f+’)’,9):f()}</pre><br></div>
+
+</li>
+</ul>
+<p>这个方法是不断监听readyState的loading状态，加载完成后则执行对应方法。具体可参考：<a href="http://www.dustindiaz.com/smallest-domready-ever" target="_blank" rel="external">http://www.dustindiaz.com/smallest-domready-ever</a></p>
+<h2 id="u6839_u636E_u7279_u5B9A_u9875_u9762_u7684_u6267_u884C_u5BF9_u5E94_u7684_u4EE3_u7801"><a href="#u6839_u636E_u7279_u5B9A_u9875_u9762_u7684_u6267_u884C_u5BF9_u5E94_u7684_u4EE3_u7801" class="headerlink" title="根据特定页面的执行对应的代码"></a>根据特定页面的执行对应的代码</h2><p>如果所有页面的代码都写在一个JavaScript文件中，这样的代码就会难以维护。简单的办法就是根据不同的页面执行不同的代码。来看下例子：</p>
+<p>例如在test.js有以下代码：</p>
+<div class="cnblogs_code"><br><pre><span style="color: #0000ff;">var</span> route =<span style="color: #000000;"> {<br>        _routes: {}, </span><span style="color: #008000;">//</span><span style="color: #008000;"> The routes will be stored here</span><br>        add: <span style="color: #0000ff;">function</span><span style="color: #000000;">(url, callback) {<br>            </span><span style="color: #0000ff;">this</span>._routes[url] =<span style="color: #000000;"> callback;<br>        },<br>        run: </span><span style="color: #0000ff;">function</span><span style="color: #000000;">() {<br>            jQuery.each(</span><span style="color: #0000ff;">this</span>._routes, <span style="color: #0000ff;">function</span>(pattern) { <span style="color: #008000;">//</span><span style="color: #008000;"> pattern 指向_routes对象集合的key,即url</span><br>                <span style="color: #0000ff;">if</span><span style="color: #000000;"> (location.href.match(pattern)) {<br>                    </span><span style="color: #008000;">//</span><span style="color: #008000;"> “this” points to the function to be executed</span><br>                    <span style="color: #0000ff;">this</span>(); <span style="color: #008000;">//</span><span style="color: #008000;">this 指向指向 _routes对象集合的value,即要执行的方法</span><br><span style="color: #000000;">                }<br>            });<br>        }<br>    }<br>    </span><span style="color: #008000;">//</span><span style="color: #008000;"> Will execute only on this page:</span><br>route.add(‘test.html’, <span style="color: #0000ff;">function</span><span style="color: #000000;">() {<br>    alert(</span>‘Hello there!’<span style="color: #000000;">);<br>});<br>route.add(</span>‘products.html’, <span style="color: #0000ff;">function</span><span style="color: #000000;">() {<br>    alert(</span>“this won’t be executed :(“<span style="color: #000000;">);<br>});<br></span><span style="color: #008000;">//</span><span style="color: #008000;"> You can even use regex-es:</span><br>route.add(‘.*.html’, <span style="color: #0000ff;">function</span><span style="color: #000000;">() {<br>    alert(</span>‘This is using a regex!’<span style="color: #000000;">);<br>});<br>route.run();</span></pre><br></div>
+
+<h2 id="u4F7F_u7528_u903B_u8F91_u4E0E_u8FD0_u7B97_u7B26"><a href="#u4F7F_u7528_u903B_u8F91_u4E0E_u8FD0_u7B97_u7B26" class="headerlink" title="使用逻辑与运算符"></a>使用逻辑与运算符</h2><p>利用逻辑与运算符可以简化条件分支语句写法，例子：</p>
+<p>一般的写法：</p>
+<div class="cnblogs_code"><br><pre><span style="color: #008000;">//</span><span style="color: #008000;"> Instead of writing this:</span><br><span style="color: #0000ff;">if</span>($(‘#elem’<span style="color: #000000;">).length){<br>   </span><span style="color: #008000;">//</span><span style="color: #008000;"> do something</span><br>}</pre><br></div>
+
+<p>更好的写法：</p>
+<div class="cnblogs_code"><br><pre>$(‘#elem’).length &amp;&amp; alert(“doing something”);</pre><br></div>
+
+<h2 id="u975E_u5E38_u6709_u7528_u7684jquery_is_28_29_u65B9_u6CD5"><a href="#u975E_u5E38_u6709_u7528_u7684jquery_is_28_29_u65B9_u6CD5" class="headerlink" title="非常有用的jquery is()方法"></a>非常有用的jquery is()方法</h2><p>is()方法非常有用，来看些例子：</p>
+<p>HTML:</p>
+<div class="cnblogs_code"><br><pre><span style="color: #0000ff;">&lt;</span><span style="color: #800000;">div </span><span style="color: #ff0000;">id</span><span style="color: #0000ff;">=”elem”</span><span style="color: #0000ff;">&gt;&lt;/</span><span style="color: #800000;">div</span><span style="color: #0000ff;">&gt;</span></pre><br></div>
+
+<p>JS:</p>
+<div class="cnblogs_code"><br><pre>// 变量保存jQuery对象<br><span style="color: #0000ff;">var</span> elem = $(‘#elem’<span style="color: #000000;">);<br></span><span style="color: #008000;">//</span><span style="color: #008000;"> 判断是否为div</span><br>elem.is(‘div’) &amp;&amp; console.log(“it’s a div”<span style="color: #000000;">);<br></span><span style="color: #008000;">//</span><span style="color: #008000;"> 是否包含类名.bigbox</span><br>elem.is(‘.bigbox’) &amp;&amp; console.log(“it has the bigbox class!”<span style="color: #000000;">);<br></span><span style="color: #008000;">//</span><span style="color: #008000;"> 是否可见</span><br>elem.is(‘:not(:visible)’) &amp;&amp; console.log(“it is hidden!”<span style="color: #000000;">);<br></span><span style="color: #008000;">//</span><span style="color: #008000;"> 设置元素执行动画</span><br>elem.animate({‘width’:200},1<span style="color: #000000;">);<br></span><span style="color: #008000;">//</span><span style="color: #008000;"> 是否执行动画</span><br>elem.is(‘:animated’) &amp;&amp; console.log(“it is animated!”);</pre><br></div>
+
+<h2 id="u5B9A_u4E49_u4E00_u4E2Aexists_u51FD_u6570"><a href="#u5B9A_u4E49_u4E00_u4E2Aexists_u51FD_u6570" class="headerlink" title="定义一个exists函数"></a>定义一个exists函数</h2><p>判断一个jQuery对象是否存在需要判断length属性，可以封装为exists函数，简化代码，更加易读。</p>
+<p>HTML：</p>
+<div class="cnblogs_code"><br><pre><span style="color: #0000ff;">&lt;</span><span style="color: #800000;">div </span><span style="color: #ff0000;">id</span><span style="color: #0000ff;">=”elem”</span><span style="color: #0000ff;">&gt;&lt;/</span><span style="color: #800000;">div</span><span style="color: #0000ff;">&gt;</span></pre><br></div>
+
+<p>JS：</p>
+<div class="cnblogs_code"><br><pre><span style="color: #008000;">//</span><span style="color: #008000;">一般方法</span><br>console.log($(‘#elem’).length == 1 ? “exists!” : “doesn’t exist!”<span style="color: #000000;">);<br></span><span style="color: #008000;">//</span><span style="color: #008000;"> 封装方法</span><br>jQuery.fn.exists = <span style="color: #0000ff;">function</span>(){ <span style="color: #0000ff;">return</span> <span style="color: #0000ff;">this</span>.length &gt; 0<span style="color: #000000;">; }<br>console.log($(</span>‘#elem’).exists() ? “exists!” : “doesn’t exist!”);</pre><br></div>
+
+<h2 id="u4F7F_u7528_24_28_29_u51FD_u6570_u7684_u7B2C_u4E8C_u4E2A_u53C2_u6570"><a href="#u4F7F_u7528_24_28_29_u51FD_u6570_u7684_u7B2C_u4E8C_u4E2A_u53C2_u6570" class="headerlink" title="使用$()函数的第二个参数"></a>使用$()函数的第二个参数</h2><p>$()函数可以接收两个参数，第二个参数的作用是什么，可以来看下例子：</p>
+<div class="cnblogs_code"><br><pre><span style="color: #0000ff;">&lt;</span><span style="color: #800000;">ul </span><span style="color: #ff0000;">id</span><span style="color: #0000ff;">=”firstList”</span> <span style="color: #0000ff;">&gt;</span><br>      <span style="color: #0000ff;">&lt;</span><span style="color: #800000;">li</span><span style="color: #0000ff;">&gt;</span>one<span style="color: #0000ff;">&lt;/</span><span style="color: #800000;">li</span><span style="color: #0000ff;">&gt;</span><br>      <span style="color: #0000ff;">&lt;</span><span style="color: #800000;">li</span><span style="color: #0000ff;">&gt;</span>two<span style="color: #0000ff;">&lt;/</span><span style="color: #800000;">li</span><span style="color: #0000ff;">&gt;</span><br>      <span style="color: #0000ff;">&lt;</span><span style="color: #800000;">li</span><span style="color: #0000ff;">&gt;</span>three<span style="color: #0000ff;">&lt;/</span><span style="color: #800000;">li</span><span style="color: #0000ff;">&gt;</span><br><span style="color: #0000ff;">&lt;/</span><span style="color: #800000;">ul</span><span style="color: #0000ff;">&gt;</span><br><br><span style="color: #0000ff;">&lt;</span><span style="color: #800000;">ul </span><span style="color: #ff0000;">id</span><span style="color: #0000ff;">=”secondList”</span> <span style="color: #0000ff;">&gt;</span><br>      <span style="color: #0000ff;">&lt;</span><span style="color: #800000;">li</span><span style="color: #0000ff;">&gt;</span>blue<span style="color: #0000ff;">&lt;/</span><span style="color: #800000;">li</span><span style="color: #0000ff;">&gt;</span><br>      <span style="color: #0000ff;">&lt;</span><span style="color: #800000;">li</span><span style="color: #0000ff;">&gt;</span>green<span style="color: #0000ff;">&lt;/</span><span style="color: #800000;">li</span><span style="color: #0000ff;">&gt;</span><br><span style="color: #0000ff;">&lt;/</span><span style="color: #800000;">ul</span><span style="color: #0000ff;">&gt;</span></pre><br></div>
+
+<p>作用一：</p>
+<div class="cnblogs_code"><br><pre><span style="color: #008000;">//</span><span style="color: #008000;">选取一个元素，通过#firstList限制元素只能在当前的ul节点范围内选取</span><br>$(‘li’ , ‘#firstList’ ). each(<span style="color: #0000ff;">function</span><span style="color: #000000;">(){<br>    console.log($(</span><span style="color: #0000ff;">this</span><span style="color: #000000;">). html());<br>});<br>//相当于$(‘#firstList’ ). find(‘li’ );<br></span></pre><br></div>
+
+<p>作用二：</p>
+<div class="cnblogs_code"><br><pre><span style="color: #008000;">//</span><span style="color: #008000;">创建一个元素。第二个参数为对应的配置属性，包含jQuery方法会被执行</span><br><span style="color: #0000ff;">var</span> div = $(‘&lt;div&gt;’<span style="color: #000000;"> ,{<br> </span>“class” : “bigBlue”<span style="color: #000000;"> ,<br> </span>“css”<span style="color: #000000;"> : {<br> </span>“background-color” : “purple”<span style="color: #000000;"><br> },<br> </span>“width” : 20<span style="color: #000000;">,<br> </span>“height” : 20<span style="color: #000000;">,<br> </span>“animate” : { <span style="color: #008000;">//</span><span style="color: #008000;">使用jQuery的方法作为属性</span><br> “width” : 200<span style="color: #000000;">,<br> </span>“height” : 50<span style="color: #000000;"><br> }<br>});<br><br>div. appendTo(</span>‘body’ );</pre><br></div>
+
+<h2 id="u53D6_u6D88_u53F3_u952EClick_u4E8B_u4EF6"><a href="#u53D6_u6D88_u53F3_u952EClick_u4E8B_u4EF6" class="headerlink" title="取消右键Click事件"></a>取消右键Click事件</h2><div class="cnblogs_code"><br><pre>$(<span style="color: #0000ff;">function</span><span style="color: #000000;">(){<br>    $(document).on(</span>“contextmenu” , <span style="color: #0000ff;">function</span><span style="color: #000000;">(e){<br>             e. preventDefault();<br>    });<br>});</span></pre><br></div>
+
+<h2 id="u53D6_u6D88_u6587_u672C_u9009_u4E2D"><a href="#u53D6_u6D88_u6587_u672C_u9009_u4E2D" class="headerlink" title="取消文本选中"></a>取消文本选中</h2><div class="cnblogs_code"><br><pre>//适应于所有浏览器<br>$(‘p.descr’ ). attr(‘unselectable’ , ‘on’<span style="color: #000000;"> )<br>                  . css(</span>‘user-select’ , ‘none’<span style="color: #000000;"> )<br>                  . on(</span>‘selectstart’ , <span style="color: #0000ff;">false</span>);</pre><br></div>
+
+<h2 id="u89E3_u6790_u951A_u5143_u7D20URL"><a href="#u89E3_u6790_u951A_u5143_u7D20URL" class="headerlink" title="解析锚元素URL"></a>解析锚元素URL</h2><div class="cnblogs_code"><br><pre><span style="color: #008000;">//</span><span style="color: #008000;"> 需要解析的URL</span><br><span style="color: #0000ff;">var</span> url = ‘<a href="http://tutorialzine.com/books/jquery-trickshots?trick=12#comments" target="_blank" rel="external">http://tutorialzine.com/books/jquery-trickshots?trick=12#comments</a>‘<span style="color: #000000;"> ;<br><br></span><span style="color: #008000;">//</span><span style="color: #008000;"> 通过url创建一个新的链接</span><br><span style="color: #0000ff;">var</span> a = $(‘&lt;a&gt;’<span style="color: #000000;"> ,{ href:  url });<br><br>console. log(</span>‘Host name: ‘ + a. prop(‘hostname’<span style="color: #000000;"> ));<br>console. log(</span>‘Path: ‘ + a. prop(‘pathname’<span style="color: #000000;"> ));<br>console. log(</span>‘Query: ‘ + a. prop(‘search’<span style="color: #000000;"> ));<br>console. log(</span>‘Protocol: ‘ + a. prop(‘protocol’<span style="color: #000000;"> ));<br>console. log(</span>‘Hash: ‘ + a. prop(‘hash’ ));</pre><br></div>
+
+<p>输出结果：</p>
+<p>Host name: tutorialzine.com<br>Path: /books/jquery-trickshots<br>Query: ?trick=12<br>Protocol: http:<br>Hash: #comments</p>
+<p>以上是一些知识总结，如有任何建议或疑问，欢迎留言讨论。</p>
+<p>参考链接：</p>
+<p><a href="http://www.cnblogs.com/rubylouvre/p/4277408.html" target="_blank" rel="external">http://www.cnblogs.com/rubylouvre/p/4277408.html</a></p>
+<p><a href="http://www.dustindiaz.com/smallest-domready-ever" target="_blank" rel="external">http://www.dustindiaz.com/smallest-domready-ever</a></p>
+
+      
+    </div>
+    
+  </div>
+  
+    
+<div class="copyright">
+  <p><span>本文标题:</span><a href="/2015/08/18/jQuery高级技巧——DOM操作篇/">jQuery高级技巧——DOM操作篇</a></p>
+  <p><span>文章作者:</span><a href="/" title="访问 Lyzh 的个人博客">Lyzh</a></p>
+  <p><span>发布时间:</span>2015年08月18日 - 23时30分</p>
+  <p><span>最后更新:</span>2016年03月26日 - 13时37分</p>
+  <p>
+    <span>原始链接:</span><a class="post-url" href="/2015/08/18/jQuery高级技巧——DOM操作篇/" title="jQuery高级技巧——DOM操作篇">http://blog.linjiajun.com/2015/08/18/jQuery高级技巧——DOM操作篇/</a>
+    <span class="copy-path" data-clipboard-text="原文: http://blog.linjiajun.com/2015/08/18/jQuery高级技巧——DOM操作篇/　　作者: Lyzh" title="点击复制文章链接">
+        <i class="fa fa-clipboard"></i>
+    </span>
+  </p>
+  <p><span>许可协议:</span><i class="fa fa-creative-commons"></i> <a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/3.0/cn/" title="中国大陆 (CC BY-NC-SA 3.0 CN)">"署名-非商用-相同方式共享 3.0"</a> 转载请保留原文链接及作者。</p>
+  <script src="/js/clipboard.min.js"></script>
+  <script> var clipboard = new Clipboard('.copy-path'); </script>
+</div>
+
+
+
+
+<nav id="article-nav">
+  
+    <div id="article-nav-newer" class="article-nav-title">
+      <a href="/2015/08/23/jQuery高级技巧——性能优化篇/">
+        jQuery高级技巧——性能优化篇
+      </a>
+    </div>
+  
+  
+    <div id="article-nav-older" class="article-nav-title">
+      <a href="/2015/08/17/使用checkbox实现纯CSS下拉框/">
+        使用checkbox实现纯CSS下拉框
+      </a>
+    </div>
+  
+</nav>
+
+  
+</article>
+
+<!-- 默认显示文章目录，在文章---前输入toc: false关闭目录 -->
+<!-- Show TOC and tocButton in default, Hide TOC via putting "toc: false" before "---" at [post].md -->
+<div id="toc" class="toc-article">
+<strong class="toc-title">文章目录</strong>
+<ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#u9875_u9762_u52A0_u8F7D_u4E4BDOMReady_u4E8B_u4EF6"><span class="toc-number">1.</span> <span class="toc-text">页面加载之DOMReady事件</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#u6839_u636E_u7279_u5B9A_u9875_u9762_u7684_u6267_u884C_u5BF9_u5E94_u7684_u4EE3_u7801"><span class="toc-number">2.</span> <span class="toc-text">根据特定页面的执行对应的代码</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#u4F7F_u7528_u903B_u8F91_u4E0E_u8FD0_u7B97_u7B26"><span class="toc-number">3.</span> <span class="toc-text">使用逻辑与运算符</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#u975E_u5E38_u6709_u7528_u7684jquery_is_28_29_u65B9_u6CD5"><span class="toc-number">4.</span> <span class="toc-text">非常有用的jquery is()方法</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#u5B9A_u4E49_u4E00_u4E2Aexists_u51FD_u6570"><span class="toc-number">5.</span> <span class="toc-text">定义一个exists函数</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#u4F7F_u7528_24_28_29_u51FD_u6570_u7684_u7B2C_u4E8C_u4E2A_u53C2_u6570"><span class="toc-number">6.</span> <span class="toc-text">使用$()函数的第二个参数</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#u53D6_u6D88_u53F3_u952EClick_u4E8B_u4EF6"><span class="toc-number">7.</span> <span class="toc-text">取消右键Click事件</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#u53D6_u6D88_u6587_u672C_u9009_u4E2D"><span class="toc-number">8.</span> <span class="toc-text">取消文本选中</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#u89E3_u6790_u951A_u5143_u7D20URL"><span class="toc-number">9.</span> <span class="toc-text">解析锚元素URL</span></a></li></ol>
+</div>
+<style type="text/css">
+  .left-col .switch-btn {
+    display: none;
+  }
+  .left-col .switch-area {
+    display: none;
+  }
+</style>
+
+<input type="button" id="tocButton" value="隐藏目录"  title="点击按钮隐藏或者显示文章目录">
+<script type="text/javascript">
+  var toc_button= document.getElementById("tocButton");
+  var toc_div= document.getElementById("toc");
+  /* Show or hide toc when click on tocButton.
+  通过点击设置的按钮显示或者隐藏文章目录.*/
+  toc_button.onclick=function(){
+  if(toc_div.style.display=="none"){
+  toc_div.style.display="block";
+  toc_button.value="隐藏目录";
+  document.getElementById("switch-btn").style.display="none";
+  document.getElementById("switch-area").style.display="none";
+  }
+  else{
+  toc_div.style.display="none";
+  toc_button.value="显示目录";
+  document.getElementById("switch-btn").style.display="block";
+  document.getElementById("switch-area").style.display="block";
+  }
+  }
+</script>
+
+<script src="http://7.url.cn/edu/jslib/comb/require-2.1.6,jquery-1.9.1.min.js"></script>
+<script>
+  if ($(".toc").length < 1) {
+    $("#toc").css("display","none");
+    $("#tocButton").css("display","none");
+    $(".switch-btn").css("display","block");
+    $(".switch-area").css("display","block");
+  }
+</script>
+
+
+<div class="share">
+	<div class="bdsharebuttonbox">
+	<a href="#" class="bds_more" data-cmd="more"></a>
+	<a href="#" class="bds_tsina" data-cmd="tsina" title="分享到新浪微博"></a>
+	<a href="#" class="bds_sqq" data-cmd="sqq" title="分享给 QQ 好友"></a>
+	<a href="#" class="bds_copy" data-cmd="copy" title="复制网址"></a>
+	<a href="#" class="bds_mail" data-cmd="mail" title="通过邮件分享"></a>
+	<a href="#" class="bds_weixin" data-cmd="weixin" title="生成文章二维码"></a>
+	</div>
+	<script>
+	window._bd_share_config={
+		"common":{"bdSnsKey":{},"bdText":"","bdMini":"2","bdMiniList":false,"bdPic":"","bdStyle":"0","bdSize":"24"},"share":{}};with(document)0[(getElementsByTagName('head')[0]||body).appendChild(createElement('script')).src='http://bdimg.share.baidu.com/static/api/js/share.js?v=89860593.js?cdnversion='+~(-new Date()/36e5)];
+	</script>
+</div>
+
+
+
+
+
+<section id="comments">
+  <div id="disqus_thread"></div>
+    <script type="text/javascript">
+    /* * * CONFIGURATION VARIABLES: EDIT BEFORE PASTING INTO YOUR WEBPAGE * * */
+    var disqus_shortname = 'bloglinjiajuncom'; // required: replace example with your forum shortname
+
+    /* * * DON'T EDIT BELOW THIS LINE * * */
+    (function() {
+      var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+      dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    })();
+  </script>
+  <noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+</section>
+
+
+
+    <style type="text/css">
+    #scroll {
+      display: none;
+    }
+    </style>
+    <div class="scroll">
+    <a href="#" title="返回顶部"><i class="fa fa-arrow-up"></i></a>
+    <a href="#comments" title="查看评论"><i class="fa fa-comments-o"></i></a>
+    <a href="#footer" title="转到底部"><i class="fa fa-arrow-down"></i></a>
+    </div>
+
+
+  
+  
+    
+    <div  class="post-nav-button">
+    <a href="/2015/08/23/jQuery高级技巧——性能优化篇/" title="上一篇: jQuery高级技巧——性能优化篇">
+    <i class="fa fa-angle-left"></i>
+    </a>
+    <a href="/2015/08/17/使用checkbox实现纯CSS下拉框/" title="下一篇: 使用checkbox实现纯CSS下拉框">
+    <i class="fa fa-angle-right"></i>
+    </a>
+    </div>
+  
+
+
+
+    
+        <link rel="stylesheet" href="/fancybox/jquery.fancybox.css" type="text/css">
+        <script>
+        var yiliaConfig = {
+        fancybox: true,
+        mathjax: true,
+        animate: true,
+        isHome: false,
+        isPost: true,
+        isArchive: false,
+        isTag: false,
+        isCategory: false,
+        open_in_new: false
+        }
+        </script>
+     
+</div>
+      <footer id="footer">
+  <div class="outer">
+    <div id="footer-info">
+      <div class="footer-left">
+        &copy; 2016 Lyzh
+      </div>
+        <div class="footer-right">
+          <a href="http://hexo.io/" target="_blank" title="快速、简洁且高效的静态博客框架">Hexo</a>  Theme <a href="https://github.com/MOxFIVE/hexo-theme-yelee" target="_blank" title="简而不减双栏 Hexo 博客主题">Yelee</a> by MOxFIVE
+        </div>
+    </div>
+    <div class="visit">
+      <span id="busuanzi_container_site_pv" style='display:none'>
+        <span id="site-visit" >本站到访数: 
+        <span id="busuanzi_value_site_uv"></span>
+        </span>
+      </span>
+      <span id="busuanzi_container_page_pv" style='display:none'>
+        <span id="page-visit">, 本页阅读量: 
+        <span id="busuanzi_value_page_pv"></span>
+        </span>
+      </span>
+    </div>
+  </div>
+</footer>
+    </div>
+    
+
+<script src="http://7.url.cn/edu/jslib/comb/require-2.1.6,jquery-1.9.1.min.js" type="text/javascript"></script>
+<script src="/js/main.js" type="text/javascript"></script>
+
+  <style>
+    body {
+      background: lightgray;
+    }
+    #container .left-col {
+      background: white;
+    }
+    .article-inner {
+      background: white;
+    }
+    .post-nav-button {
+      background: #ececec;
+    }
+    #header .header-nav .social #GitHub {
+      background-color: #bfd3ec;
+    }
+  </style>
+
+
+
+
+<script type="text/x-mathjax-config">
+MathJax.Hub.Config({
+    tex2jax: {
+        inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
+        processEscapes: true,
+        skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+    }
+});
+
+MathJax.Hub.Queue(function() {
+    var all = MathJax.Hub.getAllJax(), i;
+    for(i=0; i < all.length; i += 1) {
+        all[i].SourceElement().parentNode.className += ' has-jax';                 
+    }       
+});
+</script>
+
+<script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+</script>
+
+
+<div class="scroll" id="scroll">
+<a href="#" title="返回顶部"><i class="fa fa-arrow-up"></i></a>
+<a href="#footer" title="转到底部"><i class="fa fa-arrow-down"></i></a>
+</div>
+
+<script async src="https://dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js">
+</script>
+  </div>
+</body>
+</html>
