@@ -1,19 +1,23 @@
 {
     "res": {
         "assets/css/index.css": {
-            "uri": "/assets/css/index.css",
+            "uri": "/assets/css/index.css?t=20160808",
             "type": "css",
             "pkg": "p0"
         },
         "assets/css/reset.css": {
-            "uri": "/assets/css/reset.css",
+            "uri": "/assets/css/reset.css?t=20160808",
             "type": "css",
             "pkg": "p0"
+        },
+        "assets/css/style.min.css": {
+            "uri": "/assets/css/style.min.css?t=20160808",
+            "type": "css"
         }
     },
     "pkg": {
         "p0": {
-            "uri": "/assets/css/style.min.css",
+            "uri": "/assets/css/style.min.css?t=20160808",
             "type": "css",
             "has": [
                 "assets/css/reset.css",
