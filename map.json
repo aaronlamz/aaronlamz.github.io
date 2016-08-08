@@ -1,0 +1,24 @@
+{
+    "res": {
+        "assets/css/index.css": {
+            "uri": "/assets/css/index.css",
+            "type": "css",
+            "pkg": "p0"
+        },
+        "assets/css/reset.css": {
+            "uri": "/assets/css/reset.css",
+            "type": "css",
+            "pkg": "p0"
+        }
+    },
+    "pkg": {
+        "p0": {
+            "uri": "/assets/css/style.min.css",
+            "type": "css",
+            "has": [
+                "assets/css/reset.css",
+                "assets/css/index.css"
+            ]
+        }
+    }
+}
