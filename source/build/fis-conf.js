@@ -33,10 +33,10 @@ fis.config.merge({
 	},
 	deploy: {
 		dev: {
-			to: '../'
+			to: '../dist/'
 		},
 		prd: {
-			to: '../release'
+			to: '../'
 		}
 	}
 });
