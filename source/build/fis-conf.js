@@ -36,11 +36,11 @@ fis.config.merge({
 		]
 	},
 	deploy: {
-		// 开发环境
+		// 本地开发环境
 		dev: {
 			to: './dist/'
 		},
-		// 生产环境
+		// 线上部署环境
 		prd: {
 			to: '../'
 		}
