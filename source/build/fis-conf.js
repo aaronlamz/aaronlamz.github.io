@@ -3,7 +3,11 @@ fis.config.set('timestamp', [now.getFullYear(), now.getMonth() + 1, now.getDate(
 fis.config.merge({
 	project: {
 		charset: 'utf8',
-		md5Length: 7
+		md5Length: 7,
+		md5Connector: '-',
+		fileType: {
+			text: 'tpl, js, css'
+		}
 	},
 	roadmap: {
 		domain: {
@@ -32,9 +36,11 @@ fis.config.merge({
 		]
 	},
 	deploy: {
+		// 开发环境
 		dev: {
 			to: './dist/'
 		},
+		// 生产环境
 		prd: {
 			to: '../'
 		}
