@@ -1,7 +1,7 @@
 {
     "res": {
         "assets/css/style.min.css": {
-            "uri": "http://www.linjiajun.com/assets/css/style.min.css?t=201681616",
+            "uri": "http://www.linjiajun.com/assets/css/style.min.css?t=201681619",
             "type": "css"
         },
         "assets/less/index.less": {
@@ -17,7 +17,7 @@
     },
     "pkg": {
         "p0": {
-            "uri": "http://www.linjiajun.com/assets/css/style.min.css?t=201681616",
+            "uri": "http://www.linjiajun.com/assets/css/style.min.css?t=201681619",
             "type": "css",
             "has": [
                 "assets/less/reset.less",

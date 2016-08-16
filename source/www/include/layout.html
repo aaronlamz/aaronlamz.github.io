@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="zh-cn" class="p-index">
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+	<meta charset="utf-8">
+	{# 注释：SEO部分 #}
+	{% block seo %}
+	<title>燎原之火的世界 | Lyzh's world</title>
+	<meta name="description" content="前端工程师、Lyzh、GeniusLyzh、林嘉俊的个人网站">
+	<meta name="keywords" content="Lyzh、燎原之火、前端工程师、林嘉俊的个人网站">
+	<meta name="author" content="www.linjiajun.com、林嘉俊、Lyzh">
+	<meta name="robots" content="all">
+	{% endblock %}
+
+	{# 注释：head文件引入 #}
+	{% block head %}
+	<link rel="stylesheet" href="/assets/css/style.min.css">
+	{% endblock %}
+
+	<link rel="icon" href="/assets/img/favicon.ico">
+</head>
+<body>
+	{# 注释：主体内容 #}
+	{% block content %}
+	{% endblock %}
+
+	{# 注释：监控位 #}
+	{% block SDC %}
+ 	<link rel="import" href="/include/sdc.html?__inline">
+	{% endblock %}
+</body>
+</html>

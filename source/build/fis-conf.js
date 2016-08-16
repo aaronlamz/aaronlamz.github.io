@@ -1,3 +1,7 @@
+/**
+ * fis 配置文件
+ * Created by Lyzh on 2016-07-16
+ */
 var now = new Date();
 fis.config.set('timestamp', [now.getFullYear(), now.getMonth() + 1, now.getDate(), now.getHours()].join(''));
 fis.config.merge({
@@ -18,7 +22,9 @@ fis.config.merge({
 	},
 	roadmap: {
 		ext: {
-			less: 'css'
+			shtml: 'html',
+			less: 'css',
+			tmpl: 'js'
 		},
 		domain: {
 			'**.css': 'http://www.linjiajun.com',
@@ -26,6 +32,9 @@ fis.config.merge({
 			'image': 'http://www.linjiajun.com'
 		},
 		path: [{
+			reg: /.*\.html/i,
+			isHtmlLike: true
+		}, {
 			reg: '/assets/css/**.css',
 			query: '?t=${timestamp}',
 			useHash: false,
