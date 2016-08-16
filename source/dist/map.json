@@ -1,27 +1,27 @@
 {
     "res": {
-        "assets/css/index.css": {
-            "uri": "http://www.linjiajun.com/assets/css/index.css?t=201681523",
-            "type": "css",
-            "pkg": "p0"
-        },
-        "assets/css/reset.css": {
-            "uri": "http://www.linjiajun.com/assets/css/reset.css?t=201681523",
-            "type": "css",
-            "pkg": "p0"
-        },
         "assets/css/style.min.css": {
-            "uri": "http://www.linjiajun.com/assets/css/style.min.css?t=201681523",
+            "uri": "http://www.linjiajun.com/assets/css/style.min.css?t=201681614",
             "type": "css"
+        },
+        "assets/less/index.less": {
+            "uri": "/assets/less/index.css",
+            "type": "css",
+            "pkg": "p0"
+        },
+        "assets/less/reset.less": {
+            "uri": "/assets/less/reset.css",
+            "type": "css",
+            "pkg": "p0"
         }
     },
     "pkg": {
         "p0": {
-            "uri": "http://www.linjiajun.com/assets/css/style.min.css?t=201681523",
+            "uri": "http://www.linjiajun.com/assets/css/style.min.css?t=201681614",
             "type": "css",
             "has": [
-                "assets/css/reset.css",
-                "assets/css/index.css"
+                "assets/less/reset.less",
+                "assets/less/index.less"
             ]
         }
     }
