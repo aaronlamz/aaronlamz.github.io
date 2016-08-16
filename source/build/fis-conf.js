@@ -6,10 +6,20 @@ fis.config.merge({
 		md5Length: 7,
 		md5Connector: '-',
 		fileType: {
-			text: 'tpl, js, css'
+			text: 'tpl, shtml'
+		}
+	},
+	modules: {
+		parser: {
+			html: 'swig',
+			// 设置后缀名为less的文件使用fis-parser-less进行编译
+			less: ['less']
 		}
 	},
 	roadmap: {
+		ext: {
+			less: 'css'
+		},
 		domain: {
 			'**.css': 'http://www.linjiajun.com',
 			'**.js': 'http://www.linjiajun.com',
@@ -31,8 +41,8 @@ fis.config.merge({
 	},
 	pack: {
 		'/assets/css/style.min.css': [
-			'/assets/css/reset.css',
-			'/assets/css/index.css'
+			'/assets/less/reset.less',
+			'/assets/less/index.less'
 		]
 	},
 	deploy: {
