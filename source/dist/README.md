@@ -1,3 +1,2 @@
-# Lyzh.github.io
-## http://www.linjiajun.com
-Lyzh's blog homepage
+## lyzh's world
+> http://www.linjiajun.com
