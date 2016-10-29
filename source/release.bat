@@ -6,7 +6,7 @@ if errorlevel 2 goto prd
 if errorlevel 1 goto dev
 
 :prd
-fis release -r ./www -f ./build/fis-conf.js -d prd -po -D
+fis release -r ./www -f ./build/fis-conf.js -d prd -po 
 goto end
 
 :dev
