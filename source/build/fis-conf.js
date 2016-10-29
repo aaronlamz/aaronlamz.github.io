@@ -27,9 +27,9 @@ fis.config.merge({
 			tmpl: 'js'
 		},
 		domain: {
-			'**.css': 'http://www.linjiajun.com',
-			'**.js': 'http://www.linjiajun.com',
-			'image': 'http://www.linjiajun.com'
+			'**.css': 'http://www.lyzh.tech',
+			'**.js': 'http://www.lyzh.tech',
+			'image': 'http://www.lyzh.tech'
 		},
 		path: [{
 			reg: /.*\.html/i,
