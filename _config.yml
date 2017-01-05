@@ -7,7 +7,7 @@ permalink:           pretty
 # Setup
 title:               '林嘉俊的个人博客'
 tagline:             linxia blog
-description:         '读读书，写写代码'
+description:         '读读书，写写字'
 url:                 http://www.linjiajun.com
 baseurl:             http://www.linjiajun.com
 paginate:            5
