@@ -8,8 +8,8 @@ permalink:           pretty
 title:               '林嘉俊的个人博客'
 tagline:             linxia blog
 description:         '读读书，写写字'
-url:                 http://www.linjiajun.com
-baseurl:             http://www.linjiajun.com
+url:                 https://felinxia.github.io
+baseurl:             https://felinxia.github.io
 paginate:            5
 
 # About/contact
