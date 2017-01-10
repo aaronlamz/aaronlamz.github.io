@@ -19,6 +19,7 @@ author:
   url:               http://www.linjiajun.com
   email:             qylinxia@qq.com
 
+github: https://github.com/felinxia
 # Gems
 # from PR#40, to support local preview for Jekyll 3.0
 gems: [jekyll-paginate]
