@@ -6,9 +6,8 @@ permalink:           pretty
 
 # Setup
 title:               '林嘉俊的个人博客'
-tagline:             linxia blog
-description:         '读读书，写写字'
-#url:                 http://localhost:4000
+tagline:             linjiajun blog
+description:         'Standing on Shouders of Giants'
 url:                 https://felinxia.github.io
 baseurl:             https://felinxia.github.io
 paginate:            5
