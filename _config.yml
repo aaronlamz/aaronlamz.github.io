@@ -1,27 +1,49 @@
-# Permalinks
-#
-# Use of `relative_permalinks` ensures post links from the index work properly.
-permalink:           pretty
-# relative_permalinks: true
+# Basic
+title: Linnxia
+subtitle: 林嘉俊的个人网站
+welcome_message: A Web Developer
+description: 芝兰生于深谷，不以无人而不芳；君子修道立德，不为困穷而改节
+creator: <a href="http://www.linjiajun.com">@linnxia</a>
 
-# Setup
-title:               '林嘉俊的个人博客'
-tagline:             linjiajun blog
-description:         'Standing on Shouders of Giants'
-url:                 https://linnxia.github.io
-baseurl:             https://linnxia.github.io
-paginate:            5
+url: "http://www.linjiajun.com"
 
-# About/contact
-author:
-  name:              linjiajun
-  url:               http://www.linjiajun.com
-  email:             qylinxia@qq.com
+permalink: /:year/:month/:title/
 
-github: https://github.com/linnxia
-# Gems
-# from PR#40, to support local preview for Jekyll 3.0
+# Format
+highlighter: plain
+
+# supported colors: blue, green, purple, red, orange or slate. If you need clear, leave it empty.
+cover_color: red
+
+# The blog button should not be removed.
+blog_button:
+    title: Blog
+    description: Visit blog
+
+# Navigation buttons in the front page.
+nav:
+#    - {title: About, description: About Me, url: 'http://www.linjiajun.com'}
+    # - {title: Another Button, description: A button, url: 'http://example.com'}
+
+# Pagination
 gems: [jekyll-paginate]
+paginate: 10
+paginate_path: "page/:num/"
 
-# Custom vars
-version:             1.0.0
+# Comment
+comment:
+#    disqus: vno-jekyll
+    # duoshuo: 
+    
+# Social
+social:
+#    weibo:
+    github: linnxia
+#    twitter: onevcat
+#    gplus: 107108267983477358170
+    mail: qylinxia@qq.com
+
+# Google Analytics
+ga:
+    # id: your_ga_id
+    # host: your_host
