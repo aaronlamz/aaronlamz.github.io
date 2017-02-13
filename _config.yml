@@ -47,3 +47,7 @@ social:
 ga:
     # id: your_ga_id
     # host: your_host
+
+# 百度统计 baidu tongji
+bt:
+    switch: true

@@ -15,3 +15,16 @@
     ga('send', 'pageview');
 </script>
 {% endif %}
+
+<!--添加百度统计代码-->
+{% if site.bt.switch %}
+<script>
+    var _hmt = _hmt || [];
+    (function() {
+        var hm = document.createElement("script");
+        hm.src = "https://hm.baidu.com/hm.js?b7e3d8d5770733cbf7f2e769db32fc7c";
+        var s = document.getElementsByTagName("script")[0];
+        s.parentNode.insertBefore(hm, s);
+    })();
+</script>
+{% endif%}
