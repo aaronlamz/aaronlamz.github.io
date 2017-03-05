@@ -1,9 +1,9 @@
 # Basic
-title: Linnxia
+title: 林嘉俊的个人网站
 subtitle:
 welcome_message: A Web Developer
 description: 芝兰生于深谷，不以无人而不芳；君子修道立德，不为困穷而改节
-creator: <a href="http://www.linjiajun.com">@linnxia</a>
+creator: <a href="http://www.linjiajun.com">@linjiajun</a>
 
 url: "http://www.linjiajun.com"
 
@@ -32,13 +32,13 @@ paginate_path: "page/:num/"
 
 # Comment
 comment:
-#    disqus: vno-jekyll
+#    disqus:
      duoshuo: linjiajun
     
 # Social
 social:
 #    weibo:
-    github: linnxia
+    github: jiajunlin
 #    twitter: onevcat
 #    gplus: 107108267983477358170
     mail: qylinxia@qq.com
