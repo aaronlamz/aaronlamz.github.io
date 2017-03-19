@@ -24,7 +24,7 @@ blog_button:
 
 # Navigation buttons in the front page.
 nav:
-#    - {title: About, description: About Me, url: 'http://www.linjiajun.com'}
+    - {title: About, description: About Me, url: '/about'}
     # - {title: Another Button, description: A button, url: 'http://example.com'}
 
 # Pagination
