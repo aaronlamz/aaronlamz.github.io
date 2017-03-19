@@ -286,22 +286,22 @@ a:focus {
     Second step is nothing special, just a text with a link, so it doesn't need
     any special styling.
 
-    Let's move to 'big thoughts' with centered text and custom font sizes.
+    Let's move to 'blog thoughts' with centered text and custom font sizes.
 */
-#big {
+#blog {
     /*width: 600px;*/
     text-align: center;
     font-size: 60px;
     line-height: 1;
 }
 
-#big b {
+#blog b {
     display: block;
     font-size: 250px;
     line-height: 250px;
 }
 
-#big .thoughts {
+#blog .thoughts {
     font-size: 90px;
     line-height: 150px;
 }
