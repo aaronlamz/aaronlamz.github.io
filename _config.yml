@@ -53,8 +53,8 @@ ga:
     # host: your_host
 
 # 百度统计 baidu tongji
-bt:
-    switch: true
+baidu:
+    tongji: true
 
-# 生成网站不包含的文件
-exclude: ["Gemfile", "Gemfile.lock"]
+# _site目录不包含的文件
+exclude: ["Gemfile", "Gemfile.lock", "Rakefile"]
