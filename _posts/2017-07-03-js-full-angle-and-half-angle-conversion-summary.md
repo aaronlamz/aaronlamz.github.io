@@ -46,4 +46,8 @@ categories: JS
     }
 ```
 
+#### 参考
+[全角半角区别](https://www.zhihu.com/question/19605819)
+
+
 
