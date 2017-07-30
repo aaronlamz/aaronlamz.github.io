@@ -74,7 +74,7 @@ FileReader 对象允许Web应用程序异步读取存储在用户计算机上的
 ```javascript
     let reader = new FileReader();
 ```
-####  readAsDataURL 读取图片
+####  readAsDataURL 实现图片预览
 readAsDataURL方法返回一个data URL，它的作用基本上是将文件数据进行Base64编码。你可以将返回值设为图像的src属性。 
 ```javascript
 <div class="imgPreview">
