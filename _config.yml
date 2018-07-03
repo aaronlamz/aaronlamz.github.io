@@ -1,14 +1,14 @@
 # Basic
-title: linjiajun's blog
+title: LINJIAJUN's WebSite
 sidetitle: 
 subtitle: 
 welcome_message: Software Developer
 description: The only thing I know is that I know nothing
 seoDesc: 林嘉俊的个人博客、linjiajun blog、林嘉俊、linjiajun
-seoKeyWord: 林嘉俊、linjiajun、linjiajun.com、 http://www.linjiajun.com
-creator: <a href="http://www.linjiajun.com">@linjiajun</a>
+seoKeyWord: 林嘉俊、linjiajun、linjiajun.com、 https://www.linjiajun.com
+creator: <a href="https://www.linjiajun.com">@linjiajun</a>
 
-url: "http://www.linjiajun.com"
+url: "https://www.linjiajun.com"
 
 permalink: /:year/:month/:title/
 
@@ -26,8 +26,8 @@ blog_button:
 # Navigation buttons in the front page.
 nav:
     - {title: About, description: About Me, url: '/about'}
-    - {title: Old, description: Old Blog, url: 'http://www.cnblogs.com/GeniusLyzh/'}
-    # - {title: Another Button, description: A button, url: 'http://example.com'}
+    - {title: Old, description: Old Blog, url: 'https://www.cnblogs.com/GeniusLyzh/'}
+    # - {title: Another Button, description: A button, url: 'https://example.com'}
 
 # Pagination
 gems: [jekyll-paginate]
@@ -43,7 +43,7 @@ comment:
 social:
 #    weibo:
     github: jiajunlin
-    twitter: linjiajun2015
+    twitter: real_linjiajun
 #    gplus: 107108267983477358170
     mail: qylinxia@qq.com
 
