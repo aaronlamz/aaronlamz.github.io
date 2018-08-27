@@ -26,7 +26,7 @@ blog_button:
 # Navigation buttons in the front page.
 nav:
     - {title: About, description: About Me, url: '/about'}
-    - {title: Old, description: Old Blog, url: 'https://www.cnblogs.com/GeniusLyzh/'}
+    - {title: cnblogs, description: cnblogs, url: 'https://www.cnblogs.com/GeniusLyzh/'}
     # - {title: Another Button, description: A button, url: 'https://example.com'}
 
 # Pagination
