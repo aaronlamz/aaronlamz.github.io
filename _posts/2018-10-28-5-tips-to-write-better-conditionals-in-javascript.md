@@ -1,6 +1,6 @@
 ---
 layout: post
-title: "【译】写好JavaScript条件语句的5个技巧"
+title: "【译】编写更好JavaScript条件语句的5个技巧"
 date: 2018-10-28 23:30:06 +0800
 categories:
 ---
