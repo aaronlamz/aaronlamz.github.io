@@ -1,9 +1,15 @@
 {
-  "name": "aaronlamz.github.io",
-  "version": "1.0.0",
-  "description": "A personal blog ",
-  "main": "index.js",
-  "repository": "git@github.com:aaronlamz/aaronlamz.github.io.git",
-  "author": "aaronlamz <aaronlamz2022@gmail.com>",
-  "license": "MIT"
+  "name": "astro-starter",
+  "type": "module",
+  "version": "0.0.1",
+  "scripts": {
+    "dev": "astro dev",
+    "start": "astro dev",
+    "build": "astro build",
+    "preview": "astro preview",
+    "astro": "astro"
+  },
+  "dependencies": {
+    "astro": "^2.3.0"
+  }
 }
