@@ -1,6 +1,6 @@
 {
-  "name": "Astro Modern Personal Website",
-  "description": "Astro Modern personal website template with Project Section, CV Section, Paginated Blog, Shop, RSS Feed, SEO Friendly, Visual themes and Responsive Desing.",
+  "name": "Astro-website",
+  "description": "Astro Modern personal website template.",
   "type": "module",
   "version": "2.2.0",
   "private": true,
