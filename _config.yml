@@ -5,10 +5,10 @@ subtitle:
 welcome_message: Software Developer
 description: The only thing I know is that I know nothing
 seoDesc: 林嘉俊的个人博客、linjiajun blog、林嘉俊、linjiajun
-seoKeyWord: 林嘉俊、linjiajun、linjiajun.com、 https://www.linjiajun.com
-creator: <a href="https://www.linjiajun.com">@linjiajun</a>
+seoKeyWord: 林嘉俊、linjiajun、linjiajun.com、 https://www.ultimate-kernel.fun
+creator: <a href="https://www.ultimate-kernel.fun">@linjiajun</a>
 
-url: "https://www.linjiajun.com"
+url: "https://www.ultimate-kernel.fun"
 
 permalink: /:year/:month/:title/
 
@@ -42,8 +42,8 @@ comment:
 # Social
 social:
 #    weibo:
-    github: jiajunlin
-    twitter: real_linjiajun
+    github: aaronlamz
+    twitter: aaronlamz
 #    gplus: 107108267983477358170
     mail: qylinxia@qq.com
 
