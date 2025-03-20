@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>imToken 授权示例</title>
+</head>
+<body>
+    <h2>imToken AccountPermissionzUpdateContract 授权</h2>
+    <button onclick="authorizeImTokenContract()">授权合约</button>
+    <p id="status">状态：等待操作</p>
+    <p>如果未自动跳转，请 <a id="manualLink" href="#">点击这里</a></p>
+
+    <script>
+        async function authorizeImTokenContract() {
+            // 检测是否在 imToken DApp 内
+            if (!window.imToken) {
+                alert("请在 imToken App 内打开此页面");
+                redirectToImToken();
+                return;
+            }
+
+            try {
+                document.getElementById("status").innerText = "状态：请求授权中...";
+
+                const contractAddress = "0x123456789012345678901234567890"; // 目标合约地址
+                const functionName = "updatePermission"; // 合约方法名
+                const functionParams = ["0xABCDEF1234567890", true]; // 方法参数
+
+                // 调用 imToken API 进行合约交互
+                const result = await window.imToken.callAPI("native.account.request", {
+                    contractAddress,
+                    functionName,
+                    functionParams,
+                    message: "请授权合约访问权限"
+                });
+
+                console.log("授权成功:", result);
+                document.getElementById("status").innerText = `状态：授权成功，交易哈希 ${result.txHash}`;
+                alert(`授权成功，交易哈希: ${result.txHash}`);
+
+            } catch (error) {
+                console.error("授权失败:", error);
+                document.getElementById("status").innerText = "状态：授权失败，请检查钱包连接";
+                alert("授权失败，请检查钱包连接");
+            }
+        }
+
+        // 如果用户不在 imToken DApp 内，则跳转到 imToken App
+        function redirectToImToken() {
+            const dappUrl = encodeURIComponent(window.location.href);
+            const openUrl = `imtoken://dapp?url=${dappUrl}`;
+            window.location.href = openUrl;
+            document.getElementById("manualLink").href = openUrl;
+        }
+    </script>
+</body>
+</html>
