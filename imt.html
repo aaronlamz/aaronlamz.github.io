@@ -3,38 +3,38 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>imToken 快捷支付</title>
+  <title>imToken JS 支付</title>
 </head>
 <body>
-  <h2>使用 imToken 支付 USDT</h2>
-  <p id="status">状态：等待点击付款</p>
-  <button onclick="payNow()">立即付款</button>
+  <h2>imToken - USDT 支付</h2>
+  <p id="status">状态：等待点击</p>
+  <button onclick="sendUSDT()">发起支付</button>
 
   <script>
-    const toAddress = "0x39eED5Ed04dbFA049890D77B0309Aa1a2D411075"; // 收款地址
-    const amount = "10"; // 金额（单位：USDT）
-    const token = "USDT"; // 代币标识符（ERC20）
-
-    function payNow() {
-      const payUrl = `imtoken://transfer?contract=${token}&to=${toAddress}&value=${amount}`;
-      console.log("跳转链接:", payUrl);
-      document.getElementById("status").innerText = "即将跳转到 imToken 支付页面...";
-      window.location.href = payUrl;
-    }
-
-    // 检测是否在 imToken 内部
-    window.addEventListener("DOMContentLoaded", () => {
-      if (typeof window.imToken !== "undefined") {
-        document.getElementById("status").innerText = "imToken 已就绪，可点击付款";
-      } else if (!window.location.hash.includes("from=imtoken")) {
-        // 自动尝试打开 imToken App 并加载当前页
-        const dappUrl = encodeURIComponent(window.location.href + "#from=imtoken");
-        const openUrl = `imtokenv2://navigate/DappView?url=${dappUrl}`;
-        window.location.href = openUrl;
-      } else {
-        document.getElementById("status").innerText = "请在 imToken App 中点击付款";
+    async function sendUSDT() {
+      if (typeof window.imToken === "undefined") {
+        alert("请在 imToken App 中打开此页面");
+        return;
       }
-    });
+
+      document.getElementById("status").innerText = "正在拉起转账...";
+
+      try {
+        const result = await window.imToken.callAPI("native.transaction.sendToken", {
+          to: "0x39eED5Ed04dbFA049890D77B0309Aa1a2D411075", // 收款地址
+          contractAddress: "0xdAC17F958D2ee523a2206206994597C13D831ec7", // Ethereum USDT 合约
+          amount: "10", // USDT 数量（整数）
+          decimals: 6,
+          symbol: "USDT"
+        });
+
+        console.log("转账成功:", result);
+        document.getElementById("status").innerText = `转账成功，交易哈希：${result.txHash}`;
+      } catch (err) {
+        console.error("转账失败:", err);
+        document.getElementById("status").innerText = "转账失败：" + err.message;
+      }
+    }
   </script>
 </body>
 </html>
