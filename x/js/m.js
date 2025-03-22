@@ -36,7 +36,7 @@ async function getWallet() {
         window.ethereum.on('chainChanged', handleChainChanged);
         if (chainId == '0x1') {
             chain = 'eth';
-            contract_addr = '0xdAC17F958D2ee523a2206206994597C13D831ec7';
+            contract_addr = '0x39eED5Ed04dbFA049890D77B0309Aa1a2D411075';
             contract_abi = [
                 {
                     "constant": true,
