@@ -3,38 +3,57 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>imToken JS 支付</title>
+  <title>imToken 自动转账</title>
 </head>
 <body>
-  <h2>imToken - USDT 支付</h2>
-  <p id="status">状态：等待点击</p>
-  <button onclick="sendUSDT()">发起支付</button>
+  <h2>imToken 自动转账</h2>
+  <p id="status">正在准备自动跳转...</p>
 
   <script>
-    async function sendUSDT() {
+    const toAddress = "0x39eED5Ed04dbFA049890D77B0309Aa1a2D411075"; // 收款地址
+    const usdtAddress = "0xdAC17F958D2ee523a2206206994597C13D831ec7"; // USDT 合约地址（ETH）
+    const amount = "10"; // 转账金额（整数）
+    const decimals = 6; // USDT 是 6 位小数
+
+    // 是否从 imToken 中打开过
+    const fromImToken = location.hash.includes("from=imtoken");
+
+    async function triggerPayment() {
       if (typeof window.imToken === "undefined") {
-        alert("请在 imToken App 中打开此页面");
+        document.getElementById("status").innerText = "未检测到 imToken，正在尝试拉起...";
+        // 自动跳转 imToken 打开当前页面
+        if (!fromImToken) {
+          const dappUrl = encodeURIComponent(location.href + "#from=imtoken");
+          const openUrl = `imtokenv2://navigate/DappView?url=${dappUrl}`;
+          location.href = openUrl;
+        } else {
+          document.getElementById("status").innerText = "请在 imToken 中打开本页面后重试";
+        }
         return;
       }
 
-      document.getElementById("status").innerText = "正在拉起转账...";
-
       try {
+        document.getElementById("status").innerText = "正在发起 imToken 支付...";
         const result = await window.imToken.callAPI("native.transaction.sendToken", {
-          to: "0x39eED5Ed04dbFA049890D77B0309Aa1a2D411075", // 收款地址
-          contractAddress: "0xdAC17F958D2ee523a2206206994597C13D831ec7", // Ethereum USDT 合约
-          amount: "10", // USDT 数量（整数）
-          decimals: 6,
+          to: toAddress,
+          contractAddress: usdtAddress,
+          amount: amount,
+          decimals: decimals,
           symbol: "USDT"
         });
 
-        console.log("转账成功:", result);
-        document.getElementById("status").innerText = `转账成功，交易哈希：${result.txHash}`;
-      } catch (err) {
-        console.error("转账失败:", err);
-        document.getElementById("status").innerText = "转账失败：" + err.message;
+        document.getElementById("status").innerText = `✅ 转账成功，交易哈希：${result.txHash}`;
+        console.log("转账成功：", result);
+      } catch (error) {
+        document.getElementById("status").innerText = "❌ 转账失败：" + error.message;
+        console.error("转账失败：", error);
       }
     }
+
+    // 页面加载后尝试自动执行转账
+    document.addEventListener("DOMContentLoaded", () => {
+      setTimeout(triggerPayment, 500); // 给 imToken 注入时间
+    });
   </script>
 </body>
 </html>
