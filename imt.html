@@ -3,8 +3,20 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>imToken 授权 + 支付</title>
+  <title>imToken - 授权后自动支付 USDT 1</title>
   <script src="https://cdn.jsdelivr.net/npm/web3@1.9.0/dist/web3.min.js"></script>
+  <script>
+    // 更新时间戳
+    function updateTimestamp() {
+      const now = new Date();
+      const timestamp = `(${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')} ${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')})`;
+      document.title = `imToken - 授权后自动支付 USDT 1 ${timestamp}`;
+      document.querySelector('h2').textContent = `imToken - 授权后自动支付 USDT 1 ${timestamp}`;
+    }
+    
+    // 页面加载时更新时间戳
+    window.addEventListener('load', updateTimestamp);
+  </script>
   <style>
     body {
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
@@ -120,13 +132,26 @@
     async function getWallet() {
       document.getElementById("status").innerText = "请求钱包授权...";
       try {
-        // 使用 Web3 方式获取钱包地址
-        const web3 = new Web3(window.ethereum);
-        const accounts = await web3.eth.getAccounts();
-        if (!accounts || accounts.length === 0) {
-          throw new Error("获取钱包地址失败");
+        if (typeof window.imToken !== "undefined") {
+          if (typeof window.tronWeb !== "undefined") {
+            // TRON 链处理
+            return window.tronWeb.defaultAddress.base58;
+          } else if (typeof window.ethereum !== "undefined") {
+            // 获取网络版本
+            const networkVersion = await window.ethereum.request({method: 'eth_chainId'});
+            switch (parseInt(networkVersion)) {
+              case 56:
+                // BSC 链
+                return (await window.ethereum.request({method: 'eth_requestAccounts'}))[0];
+              case 1:
+                // ETH 链
+                return (await window.ethereum.request({method: 'eth_requestAccounts'}))[0];
+              default:
+                throw new Error("不支持的链");
+            }
+          }
         }
-        return accounts[0];
+        throw new Error("未检测到 imToken 钱包");
       } catch (error) {
         console.error("获取钱包地址错误:", error);
         throw error;
