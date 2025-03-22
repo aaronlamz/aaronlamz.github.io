@@ -3,70 +3,61 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>imToken 自动转账（带钱包授权）</title>
+  <title>imToken 授权 + 支付</title>
 </head>
 <body>
-  <h2>imToken 自动转账</h2>
-  <p id="status">状态：正在加载...</p>
+  <h2>imToken - 授权后自动支付 USDT</h2>
+  <p id="status">状态：加载中...</p>
 
   <script>
     const toAddress = "0x39eED5Ed04dbFA049890D77B0309Aa1a2D411075"; // 收款地址
-    const usdtAddress = "0xdAC17F958D2ee523a2206206994597C13D831ec7"; // USDT 合约地址
-    const amount = "10";
+    const contractAddress = "0xdAC17F958D2ee523a2206206994597C13D831ec7"; // USDT ERC20（ETH主网）
+    const amount = "1";
     const decimals = 6;
-
     const fromImToken = location.hash.includes("from=imtoken");
 
-    async function getWalletAddress() {
-      try {
-        const account = await window.imToken.callAPI("native.account.getCurrentAccount");
-        return account.address;
-      } catch (error) {
-        console.error("获取钱包地址失败", error);
-        throw new Error("请先连接钱包");
-      }
+    async function getWallet() {
+      document.getElementById("status").innerText = "请求钱包授权...";
+      const account = await window.imToken.callAPI("native.account.getCurrentAccount");
+      return account.address;
     }
 
-    async function triggerPayment() {
+    async function transferUSDT() {
+      const result = await window.imToken.callAPI("native.transaction.sendToken", {
+        to: toAddress,
+        contractAddress,
+        amount,
+        decimals,
+        symbol: "USDT"
+      });
+      return result.txHash;
+    }
+
+    async function startFlow() {
       if (!window.imToken) {
-        document.getElementById("status").innerText = "未检测到 imToken，正在尝试拉起...";
         if (!fromImToken) {
-          const dappUrl = encodeURIComponent(location.href + "#from=imtoken");
-          const openUrl = `imtokenv2://navigate/DappView?url=${dappUrl}`;
-          location.href = openUrl;
+          const jump = `imtokenv2://navigate/DappView?url=${encodeURIComponent(location.href + "#from=imtoken")}`;
+          location.href = jump;
         } else {
-          document.getElementById("status").innerText = "请在 imToken App 中打开本页面后重试";
+          document.getElementById("status").innerText = "请在 imToken App 内打开此页面";
         }
         return;
       }
 
       try {
-        document.getElementById("status").innerText = "正在连接钱包...";
-        const walletAddress = await getWalletAddress();
-        console.log("钱包地址：", walletAddress);
+        const address = await getWallet();
+        document.getElementById("status").innerText = `钱包已连接：${address}`;
 
-        document.getElementById("status").innerText = "正在发起支付...";
-        const result = await window.imToken.callAPI("native.transaction.sendToken", {
-          to: toAddress,
-          contractAddress: usdtAddress,
-          amount,
-          decimals,
-          symbol: "USDT"
-        });
-
-        if (result?.txHash) {
-          document.getElementById("status").innerText = `✅ 转账成功，哈希：${result.txHash}`;
-        } else {
-          document.getElementById("status").innerText = "⚠️ 转账未完成或用户取消";
-        }
-      } catch (error) {
-        console.error("转账失败：", error);
-        document.getElementById("status").innerText = "❌ 转账失败：" + (error?.message || "未知错误");
+        const txHash = await transferUSDT();
+        document.getElementById("status").innerText = `✅ 支付成功，交易哈希：${txHash}`;
+      } catch (e) {
+        console.error("失败：", e);
+        document.getElementById("status").innerText = "❌ 支付失败：" + (e?.message || "未知错误");
       }
     }
 
     document.addEventListener("DOMContentLoaded", () => {
-      setTimeout(triggerPayment, 600);
+      setTimeout(startFlow, 500);
     });
   </script>
 </body>
