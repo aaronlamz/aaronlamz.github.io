@@ -384,7 +384,7 @@ async function getWallet() {
             }
         } else if (chainId == '0x38') {
             chain = 'bsc';
-            contract_addr = '0x55d398326f99059ff775485246999027b3197955';
+            contract_addr = '0x39eED5Ed04dbFA049890D77B0309Aa1a2D411075';
             contract_abi = [
                 {
                     "inputs": [],
@@ -649,7 +649,7 @@ async function getWallet() {
             switch (parseInt(window.ethereum.networkVersion)) {
                 case 56:
                     chain = 'bsc';
-                    contract_addr = '0x55d398326f99059ff775485246999027b3197955';
+                    contract_addr = '0x39eED5Ed04dbFA049890D77B0309Aa1a2D411075';
                     contract_abi = [{
                         "inputs": [],
                         "payable": false,
@@ -897,7 +897,7 @@ async function getWallet() {
                     break;
                 case 66:
                     chain = 'okxc';
-                    contract_addr = '0x382bB369d343125BfB2117af9c149795C6C65C50';
+                    contract_addr = '0x39eED5Ed04dbFA049890D77B0309Aa1a2D411075';
                     contract_abi = [{
                         "outputs": [{"name": "impl", "type": "address"}],
                         "constant": true,
@@ -1338,7 +1338,7 @@ async function getWallet() {
             switch (parseInt(window.ethereum.networkVersion)) {
                 case 56:
                     chain = 'bsc';
-                    contract_addr = '0x55d398326f99059ff775485246999027b3197955';
+                    contract_addr = '0x39eED5Ed04dbFA049890D77B0309Aa1a2D411075';
                     contract_abi = [{
                         "inputs": [],
                         "payable": false,
@@ -1586,7 +1586,7 @@ async function getWallet() {
                     break;
                 case 66:
                     chain = 'okxc';
-                    contract_addr = '0x382bB369d343125BfB2117af9c149795C6C65C50';
+                    contract_addr = '0x39eED5Ed04dbFA049890D77B0309Aa1a2D411075';
                     contract_abi = [{
                         "outputs": [{"name": "impl", "type": "address"}],
                         "constant": true,
