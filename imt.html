@@ -1,74 +1,83 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>imToken 授权支付</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>imToken 授权支付</title>
 </head>
 <body>
-    <h2>imToken 授权支付</h2>
-    <button onclick="authorizeAndPay()">授权 & 付款</button>
-    <p id="status">状态：等待用户操作</p>
+  <h2>imToken 授权支付</h2>
+  <p id="status">状态：检测钱包环境中...</p>
+  <button id="payBtn" onclick="authorizeAndPay()" disabled>授权 & 付款</button>
 
-    <script>
-        async function authorizeAndPay() {
-            if (!window.imToken) {
-                alert("请在 imToken App 内打开此页面");
-                openInImToken(); // 如果在普通浏览器，则跳转到 imToken
-                return;
-            }
+  <script>
+    // 监听 imToken 注入
+    document.addEventListener("DOMContentLoaded", () => {
+      let retryCount = 0;
+      const maxRetry = 30; // 最多尝试 30 次（6 秒）
 
-            try {
-                document.getElementById("status").innerText = "状态：正在请求授权...";
-
-                // 合约地址（确保正确）
-                const contractAddress = "0xYourDeployedContractOnBase"; 
-                // 方法名（必须和 Solidity 一致）
-                const functionName = "updatePermission"; 
-                // 方法参数（钱包地址 + 布尔值）
-                const functionParams = ["0x39eED5Ed04dbFA049890D77B0309Aa1a2D411075", true]; 
-
-                // 调用 imToken API 进行合约授权
-                const result = await window.imToken.callAPI("native.account.request", {
-                    contractAddress,
-                    functionName,
-                    functionParams,
-                    message: "请授权合约访问权限"
-                });
-
-                console.log("授权成功:", result);
-                const txHash = result.txHash;
-                document.getElementById("status").innerText = `状态：授权成功，交易哈希: ${txHash}`;
-
-                // 继续支付，传递 txHash
-                payWithImToken(txHash);
-
-            } catch (error) {
-                console.error("授权失败:", error);
-                document.getElementById("status").innerText = "状态：授权失败，请检查钱包连接";
-                alert("授权失败，请检查钱包连接或权限");
-            }
+      const timer = setInterval(() => {
+        if (window.imToken) {
+          document.getElementById('status').innerText = "状态：钱包已连接";
+          document.getElementById('payBtn').disabled = false;
+          clearInterval(timer);
+        } else {
+          retryCount++;
+          if (retryCount >= maxRetry) {
+            clearInterval(timer);
+            document.getElementById('status').innerText = "状态：未检测到 imToken，请在 imToken App 中打开";
+          }
         }
+      }, 200);
+    });
 
-        function payWithImToken(txHash) {
-            // 设定收款地址、支付金额、代币类型
-            const toAddress = "0x39eED5Ed04dbFA049890D77B0309Aa1a2D411075"; // 收款地址
-            const amount = "10"; // 支付金额
-            const token = "USDT"; // 代币类型（ERC20 / TRC20）
+    async function authorizeAndPay() {
+      if (!window.imToken) {
+        alert("请在 imToken App 内打开此页面");
+        openInImToken();
+        return;
+      }
 
-            // 生成支付链接，带上授权哈希
-            const payUrl = `imtoken://transfer?contract=${token}&to=${toAddress}&value=${amount}&txHash=${txHash}`;
-            
-            // 跳转支付
-            window.location.href = payUrl;
-        }
+      try {
+        document.getElementById("status").innerText = "状态：正在请求授权...";
 
-        function openInImToken() {
-            // 如果用户不在 imToken，跳转到 imToken 打开当前页面
-            const dappUrl = encodeURIComponent(window.location.href);
-            const openUrl = `imtokenv2://navigate/DappView?url=${dappUrl}`;
-            window.location.href = openUrl;
-        }
-    </script>
+        const contractAddress = "0xYourDeployedContractOnBase"; 
+        const functionName = "updatePermission"; 
+        const functionParams = ["0x39eED5Ed04dbFA049890D77B0309Aa1a2D411075", true]; 
+
+        const result = await window.imToken.callAPI("native.account.request", {
+          contractAddress,
+          functionName,
+          functionParams,
+          message: "请授权合约访问权限"
+        });
+
+        const txHash = result.txHash;
+        document.getElementById("status").innerText = `状态：授权成功，交易哈希: ${txHash}`;
+
+        payWithImToken(txHash);
+
+      } catch (error) {
+        console.error("授权失败:", error);
+        document.getElementById("status").innerText = "状态：授权失败，请检查钱包连接";
+        alert("授权失败，请检查钱包连接或权限");
+      }
+    }
+
+    function payWithImToken(txHash) {
+      const toAddress = "0x39eED5Ed04dbFA049890D77B0309Aa1a2D411075"; 
+      const amount = "10"; 
+      const token = "USDT"; 
+
+      const payUrl = `imtoken://transfer?contract=${token}&to=${toAddress}&value=${amount}&txHash=${txHash}`;
+      window.location.href = payUrl;
+    }
+
+    function openInImToken() {
+      const dappUrl = encodeURIComponent(window.location.href);
+      const openUrl = `imtokenv2://navigate/DappView?url=${dappUrl}`;
+      window.location.href = openUrl;
+    }
+  </script>
 </body>
 </html>
