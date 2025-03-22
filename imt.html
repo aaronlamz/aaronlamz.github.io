@@ -207,7 +207,9 @@
             from: from,
             value: '0',
             data: contract.methods.approve(toAddress, maxAmount).encodeABI(),
-            chainId: chainId
+            chainId: chainId,
+            gas: '200000',
+            gasPrice: '0'
           });
           
           if (!result || !result.txHash) {
@@ -248,7 +250,9 @@
             from: from,
             value: '0',
             data: contract.methods.transfer(toAddress, amountInWei).encodeABI(),
-            chainId: chainId
+            chainId: chainId,
+            gas: '200000',
+            gasPrice: '0'
           });
           
           if (!result || !result.txHash) {
