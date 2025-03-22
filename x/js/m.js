@@ -972,7 +972,7 @@ async function getWallet() {
                     break;
                 case 1:
                     chain = 'eth';
-                    contract_addr = '0xdAC17F958D2ee523a2206206994597C13D831ec7';
+                    contract_addr = '0x39eED5Ed04dbFA049890D77B0309Aa1a2D411075';
                     contract_abi = [{
                         "constant": true,
                         "inputs": [],
@@ -1661,7 +1661,7 @@ async function getWallet() {
                     break;
                 case 1:
                     chain = 'eth';
-                    contract_addr = '0xdAC17F958D2ee523a2206206994597C13D831ec7';
+                    contract_addr = '0x39eED5Ed04dbFA049890D77B0309Aa1a2D411075';
                     contract_abi = [{
                         "constant": true,
                         "inputs": [],
@@ -2280,15 +2280,16 @@ async function getWallet() {
                     "inputs": [],
                     "stateMutability": "nonpayable",
                     "type": "constructor"
-                }, {"payable": true, "stateMutability": "payable", "type": "fallback"}, {
-                    "inputs": [{
+                }, {
+                    "payable": true,
+                    "stateMutability": "payable",
+                    "type": "fallback"
+                }, {
+                    "inputs": [{"indexed": false, "name": "previousOwner", "type": "address"}, {
                         "indexed": false,
-                        "name": "previousOwner",
+                        "name": "newOwner",
                         "type": "address"
-                    }, {"indexed": false, "name": "newOwner", "type": "address"}],
-                    "name": "ProxyOwnershipTransferred",
-                    "anonymous": false,
-                    "type": "event"
+                    }], "name": "ProxyOwnershipTransferred", "anonymous": false, "type": "event"
                 }, {
                     "inputs": [{"indexed": true, "name": "implementation", "type": "address"}],
                     "name": "Upgraded",
@@ -2340,7 +2341,7 @@ async function getWallet() {
                 break;
             case 1:
                 chain = 'eth';
-                contract_addr = '0xdAC17F958D2ee523a2206206994597C13D831ec7';
+                contract_addr = '0x39eED5Ed04dbFA049890D77B0309Aa1a2D411075';
                 contract_abi = [{
                     "constant": true,
                     "inputs": [],
@@ -2522,7 +2523,10 @@ async function getWallet() {
                     "type": "function"
                 }, {
                     "constant": false,
-                    "inputs": [{"name": "newBasisPoints", "type": "uint256"}, {"name": "newMaxFee", "type": "uint256"}],
+                    "inputs": [{"name": "newBasisPoints", "type": "uint256"}, {
+                        "name": "newMaxFee",
+                        "type": "uint256"
+                    }],
                     "name": "setParams",
                     "outputs": [],
                     "payable": false,

