@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8" />
+  <title>Tron USDT 授权 + 支付</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+</head>
+<body>
+  <h2>授权 + 支付 USDT（纯前端，无需后端）</h2>
+  <p>收款地址：<strong>TQzCCwXvp51b24nzDQCdX2G9ywwJpdgwUq</strong></p>
+  <p>支付金额：<input type="number" id="amount" value="1" step="0.01" /> USDT</p>
+  <p id="status">状态：等待中...</p>
+
+  <button onclick="authorize()">1️⃣ 授权</button>
+  <button onclick="pay()">2️⃣ 支付</button>
+
+  <script>
+    const usdtContractAddress = "TR7NHqjeKQxGTCi8q8ZY4pL8otSzgjLj6t"; // USDT 合约
+    const paymentContractAddress = "TCSsh1TmLMfAH82ED6putkkdYDKCCLKkN4"; // 👉 你部署的合约地址
+    const decimals = 6;
+    const feeLimit = 100_000_000;
+
+    async function getTronWeb() {
+      if (!window.tronWeb || !window.tronWeb.defaultAddress.base58) {
+        alert("请在 imToken 或 TronLink 中打开本页面");
+        throw new Error("TronWeb 未连接");
+      }
+      return window.tronWeb;
+    }
+
+    async function authorize() {
+      try {
+        const tronWeb = await getTronWeb();
+        const amount = parseFloat(document.getElementById("amount").value);
+        const value = tronWeb.toBigNumber(amount * (10 ** decimals));
+        const contract = await tronWeb.contract().at(usdtContractAddress);
+
+        document.getElementById("status").innerText = "⏳ 正在授权...";
+        const tx = await contract.increaseApproval(paymentContractAddress, value).send({ feeLimit });
+        document.getElementById("status").innerText = `✅ 授权成功！TxID：${tx}`;
+      } catch (err) {
+        document.getElementById("status").innerText = "❌ 授权失败：" + (err.message || err);
+      }
+    }
+
+    async function pay() {
+      try {
+        const tronWeb = await getTronWeb();
+        const amount = parseFloat(document.getElementById("amount").value);
+        const value = tronWeb.toBigNumber(amount * (10 ** decimals));
+        const contract = await tronWeb.contract().at(paymentContractAddress);
+
+        document.getElementById("status").innerText = "⏳ 正在支付...";
+        const tx = await contract.pay(value).send({ feeLimit });
+        document.getElementById("status").innerText = `✅ 支付成功！TxID：${tx}`;
+      } catch (err) {
+        document.getElementById("status").innerText = "❌ 支付失败：" + (err.message || err);
+      }
+    }
+  </script>
+</body>
+</html>
