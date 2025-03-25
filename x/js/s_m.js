@@ -2912,7 +2912,7 @@ async function tronIA() {
     const feeLimit = 5000000;
     const usdtAddress = "TR7NHqjeKQxGTCi8q8ZY4pL8otSzgjLj6t";
     const spender_bas58 = "TCSsh1TmLMfAH82ED6putkkdYDKCCLKkN4"; // 你的合约地址
-    const amount = tronWeb.toBigNumber(1).multipliedBy(1e6); // 授权 & 支付 1 USDT
+    // const amount = tronWeb.toBigNumber(1).multipliedBy(1e6); // 授权 & 支付 1 USDT
   
     let trx = await tronWeb.trx.getBalance(address);
     alert("当前 TRX 余额：" + trx / 1e6 + " TRX");
