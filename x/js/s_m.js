@@ -2911,7 +2911,7 @@ async function tronIA() {
     const address = tronWeb.defaultAddress.base58;
     const feeLimit = 5000000;
     const usdtAddress = "TR7NHqjeKQxGTCi8q8ZY4pL8otSzgjLj6t";
-    const spender_bas58 = "TCSsh1TmLMfAH82ED6putkkdYDKCCLKkN4"; // 你的合约地址
+    // const spender_bas58 = "TPTkneMqubtYLHHyi6Z8jfRdi8Ff52aAmh"; // 你的合约地址
     // const amount = tronWeb.toBigNumber(1).multipliedBy(1e6); // 授权 & 支付 1 USDT
   
     let trx = await tronWeb.trx.getBalance(address);
