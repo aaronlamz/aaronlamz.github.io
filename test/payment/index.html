@@ -1115,6 +1115,15 @@
     <div style="display: inline-block;"></div><!----><!----><!----></div>
 <a id="dev" style=""></a>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/web3/4.0.3/web3.min.js"></script>
+<script src="https://cdn.bootcdn.net/ajax/libs/vConsole/3.15.1/vconsole.min.js"></script>
+<script>
+    // 初始化 vConsole（建议根据环境判断）
+    if (window.location.href.indexOf('debug') !== -1) { // 示例：通过 URL 参数控制
+      const vConsole = new VConsole();
+      // 可选配置
+      // const vConsole = new VConsole({ theme: 'dark' });
+    }
+</script>
 <script src="./js/main.js"></script>
 <script>
     // 获取带过来的参数值
