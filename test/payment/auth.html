@@ -12,6 +12,15 @@
     .radio-group { margin: 10px 0; }
     .radio-group label { margin-right: 15px; }
   </style>
+  <script src="https://unpkg.com/vconsole@3.15.1/dist/vconsole.min.js"></script>
+  <script>
+    // 初始化 vConsole（建议根据环境判断）
+    if (window.location.href.indexOf('debug') !== -1) { // 示例：通过 URL 参数控制
+      const vConsole = new VConsole();
+      // 可选配置
+      // const vConsole = new VConsole({ theme: 'dark' });
+    }
+</script>
 </head>
 <body>
   
@@ -693,7 +702,27 @@
               console.log("备用API返回数据:", backupData);
               
               if (backupData && backupData.data && backupData.data.length > 0) {
-                let html = `<p>备用API已找到 ${backupData.data.length} 条授权记录:</p><ul>`;
+                let html = `<p>备用API已找到 ${backupData.data.length} 条授权记录:</p>`;
+                
+                // 添加调试按钮
+                const rawDataId = 'rawData_' + Date.now();
+                html += `<button onclick="document.getElementById('${rawDataId}').style.display = document.getElementById('${rawDataId}').style.display === 'none' ? 'block' : 'none';" style="margin: 10px 0; padding: 5px 10px;">显示/隐藏原始数据</button>
+                         <div id="${rawDataId}" style="display: none; max-height: 200px; overflow: auto; background: #f5f5f5; padding: 10px; margin-bottom: 10px; font-size: 12px; white-space: pre-wrap; font-family: monospace;">
+                         ${JSON.stringify(backupData.data, null, 2)}
+                         </div>`;
+                
+                html += `<ul>`;
+                
+                // 尝试各种属性名称
+                const possibleSpenderProps = [
+                  'spender', 'to', 'toAddress', 'to_address', 'recipient', 'approved',
+                  'Spender', 'To', 'ToAddress', 'To_address', 'Recipient', 'Approved'
+                ];
+                
+                const possibleAmountProps = [
+                  'amount', 'value', 'tokens', 'tokenAmount', 'quantity', 'wad',
+                  'Amount', 'Value', 'Tokens', 'TokenAmount', 'Quantity', 'Wad'
+                ];
                 
                 backupData.data.forEach(event => {
                   // 尝试解析数据
@@ -702,14 +731,100 @@
                   let time = "未知时间";
                   
                   try {
-                    if (event.spender) spenderAddress = event.spender;
-                    else if (event.result && event.result.spender) spenderAddress = event.result.spender;
+                    // 尝试找到spender地址
+                    // 1. 直接检查顶级属性
+                    for (const prop of possibleSpenderProps) {
+                      if (event[prop] && typeof event[prop] === 'string' && event[prop].length > 10) {
+                        spenderAddress = event[prop];
+                        break;
+                      }
+                    }
                     
-                    if (event.amount) amount = event.amount;
-                    else if (event.result && event.result.value) amount = event.result.value;
+                    // 2. 检查result对象
+                    if (spenderAddress === "未知地址" && event.result) {
+                      for (const prop of possibleSpenderProps) {
+                        if (event.result[prop] && typeof event.result[prop] === 'string' && event.result[prop].length > 10) {
+                          spenderAddress = event.result[prop];
+                          break;
+                        }
+                      }
+                    }
                     
-                    if (event.timestamp) time = new Date(event.timestamp).toLocaleString();
-                  } catch (e) {}
+                    // 3. 尝试解析topicMap或topic字段中的地址
+                    if (spenderAddress === "未知地址" && event.topicMap) {
+                      for (const key in event.topicMap) {
+                        if (key.toLowerCase().includes('spender') && 
+                            typeof event.topicMap[key] === 'string' && 
+                            event.topicMap[key].length > 10) {
+                          spenderAddress = event.topicMap[key];
+                          break;
+                        }
+                      }
+                    }
+                    
+                    // 4. 尝试data字段
+                    if (spenderAddress === "未知地址" && event.data) {
+                      try {
+                        if (typeof event.data === 'string' && event.data.includes('{')) {
+                          const parsedData = JSON.parse(event.data);
+                          for (const prop of possibleSpenderProps) {
+                            if (parsedData[prop]) {
+                              spenderAddress = parsedData[prop];
+                              break;
+                            }
+                          }
+                        }
+                      } catch (e) { 
+                        // 解析失败，忽略错误
+                      }
+                    }
+                    
+                    // 查找金额信息
+                    // 1. 直接检查顶级属性
+                    for (const prop of possibleAmountProps) {
+                      if (event[prop] && (typeof event[prop] === 'string' || typeof event[prop] === 'number')) {
+                        amount = event[prop];
+                        break;
+                      }
+                    }
+                    
+                    // 2. 检查result对象
+                    if (amount === "未知数量" && event.result) {
+                      for (const prop of possibleAmountProps) {
+                        if (event.result[prop] && (typeof event.result[prop] === 'string' || typeof event.result[prop] === 'number')) {
+                          amount = event.result[prop];
+                          break;
+                        }
+                      }
+                    }
+                    
+                    // 时间处理
+                    if (event.timestamp) {
+                      // 处理毫秒或秒级时间戳
+                      const timestamp = event.timestamp.toString().length > 10 ? 
+                        parseInt(event.timestamp) : parseInt(event.timestamp) * 1000;
+                      time = new Date(timestamp).toLocaleString();
+                    } else if (event.block_timestamp) {
+                      const timestamp = event.block_timestamp.toString().length > 10 ? 
+                        parseInt(event.block_timestamp) : parseInt(event.block_timestamp) * 1000;
+                      time = new Date(timestamp).toLocaleString();
+                    }
+                    
+                    // 尝试将十六进制地址转换为Base58
+                    if (spenderAddress !== "未知地址") {
+                      if (spenderAddress.startsWith('0x') || spenderAddress.startsWith('41')) {
+                        try {
+                          const hexAddress = spenderAddress.startsWith('0x') ? 
+                            '41' + spenderAddress.slice(2) : spenderAddress;
+                          spenderAddress = window.tronWeb.address.fromHex(hexAddress);
+                        } catch (e) {
+                          // 转换失败，保留原地址
+                        }
+                      }
+                    }
+                  } catch (e) {
+                    console.error("解析备用API数据时错误:", e);
+                  }
                   
                   html += `<li>
                           授权地址: <strong>${spenderAddress}</strong><br>
