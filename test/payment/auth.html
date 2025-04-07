@@ -27,6 +27,15 @@
     <label>批准额度 (整数): <input type="text" id="approveAmount" placeholder="例如：1000000000000000000"></label>
     <button id="approveBtn">授权</button>
     <div id="approveResult"></div>
+    
+    <!-- 添加查询授权记录功能 -->
+    <div style="margin-top: 20px; border-top: 1px solid #ddd; padding-top: 15px;">
+      <h3>查询授权记录</h3>
+      <p>查询当前钱包地址对该Token的授权情况</p>
+      <button id="queryAllowanceBtn">查询当前授权</button>
+      <button id="queryHistoryBtn">查询授权历史</button>
+      <div id="allowanceResult" style="margin-top: 10px; padding: 10px; border: 1px solid #eee; min-height: 50px; max-height: 300px; overflow-y: auto; background-color: #f9f9f9;"></div>
+    </div>
   </div>
   
   <!-- 引入所需库 -->
@@ -278,6 +287,199 @@
           resultDiv.innerText = "调用 increaseApproval 失败: " + error.message;
           console.error("Tron increaseApproval error:", error);
         }
+      }
+    });
+    
+    // 查询当前授权额度
+    document.getElementById('queryAllowanceBtn').addEventListener('click', async function() {
+      const allowanceResultDiv = document.getElementById('allowanceResult');
+      const tokenAddress = document.getElementById('tokenAddress').value.trim();
+      
+      if (!tokenAddress) {
+        allowanceResultDiv.innerText = "请输入Token合约地址";
+        return;
+      }
+      
+      // 确保已连接钱包
+      if (detectedNetworkType === 'evm') {
+        if (!evmAccount) {
+          await connectEVMWallet();
+          if (!evmAccount) {
+            allowanceResultDiv.innerText = "请先连接EVM钱包";
+            return;
+          }
+        }
+        
+        // 获取所有已授权的地址(这很难在EVM链上直接实现，需要使用第三方API或索引服务)
+        allowanceResultDiv.innerHTML = `<p>EVM网络暂不支持查询全部授权记录，请输入特定地址查询授权额度。</p>`;
+        
+        const spenderAddress = document.getElementById('spenderAddress').value.trim();
+        if (spenderAddress) {
+          try {
+            allowanceResultDiv.innerHTML += "<p>正在查询授权额度...</p>";
+            
+            // ERC20 allowance方法的ABI
+            const erc20Abi = [
+              {
+                "constant": true,
+                "inputs": [
+                  { "name": "_owner", "type": "address" },
+                  { "name": "_spender", "type": "address" }
+                ],
+                "name": "allowance",
+                "outputs": [{ "name": "", "type": "uint256" }],
+                "type": "function"
+              }
+            ];
+            
+            const tokenContract = new web3.eth.Contract(erc20Abi, tokenAddress);
+            const allowance = await tokenContract.methods.allowance(evmAccount, spenderAddress).call();
+            
+            allowanceResultDiv.innerHTML += `<p>地址 <strong>${spenderAddress}</strong> 被授权额度: <strong>${allowance}</strong></p>`;
+          } catch (error) {
+            allowanceResultDiv.innerHTML += `<p style="color:red">查询授权失败: ${error.message}</p>`;
+            console.error("查询EVM授权失败:", error);
+          }
+        }
+      } else if (detectedNetworkType === 'tron') {
+        if (!tronAccount) {
+          await connectTRONWallet();
+          if (!tronAccount) {
+            allowanceResultDiv.innerText = "请先连接TRON钱包";
+            return;
+          }
+        }
+        
+        try {
+          allowanceResultDiv.innerHTML = "<p>正在查询授权记录...</p>";
+          
+          const spenderAddress = document.getElementById('spenderAddress').value.trim();
+          if (spenderAddress) {
+            // 查询特定地址的授权额度
+            const contract = await window.tronWeb.contract().at(tokenAddress);
+            const allowance = await contract.allowance(tronAccount, spenderAddress).call();
+            
+            allowanceResultDiv.innerHTML = `<p>地址 <strong>${spenderAddress}</strong> 被授权额度: <strong>${allowance}</strong></p>`;
+          } else {
+            allowanceResultDiv.innerHTML = "<p>请输入要查询的收款地址(Spender)</p>";
+          }
+        } catch (error) {
+          allowanceResultDiv.innerHTML = `<p style="color:red">查询授权失败: ${error.message}</p>`;
+          console.error("查询TRON授权失败:", error);
+        }
+      } else {
+        allowanceResultDiv.innerText = "未检测到支持的网络环境";
+      }
+    });
+    
+    // 查询授权历史记录
+    document.getElementById('queryHistoryBtn').addEventListener('click', async function() {
+      const allowanceResultDiv = document.getElementById('allowanceResult');
+      const tokenAddress = document.getElementById('tokenAddress').value.trim();
+      
+      if (!tokenAddress) {
+        allowanceResultDiv.innerText = "请输入Token合约地址";
+        return;
+      }
+      
+      allowanceResultDiv.innerHTML = "<p>正在查询授权历史记录...</p>";
+      
+      if (detectedNetworkType === 'evm') {
+        if (!evmAccount) {
+          await connectEVMWallet();
+          if (!evmAccount) {
+            allowanceResultDiv.innerText = "请先连接EVM钱包";
+            return;
+          }
+        }
+        
+        try {
+          // ERC20 Approval事件的ABI
+          const erc20Abi = [
+            {
+              "anonymous": false,
+              "inputs": [
+                { "indexed": true, "name": "owner", "type": "address" },
+                { "indexed": true, "name": "spender", "type": "address" },
+                { "indexed": false, "name": "value", "type": "uint256" }
+              ],
+              "name": "Approval",
+              "type": "event"
+            }
+          ];
+          
+          const tokenContract = new web3.eth.Contract(erc20Abi, tokenAddress);
+          
+          // 获取过去的授权事件(注意：这可能会受到RPC节点的限制)
+          const events = await tokenContract.getPastEvents('Approval', {
+            filter: { owner: evmAccount },
+            fromBlock: 0,
+            toBlock: 'latest'
+          });
+          
+          if (events && events.length > 0) {
+            let html = `<p>已找到 ${events.length} 条授权记录:</p><ul>`;
+            
+            events.forEach(event => {
+              const { owner, spender, value } = event.returnValues;
+              html += `<li>授权地址: <strong>${spender}</strong>, 授权额度: <strong>${value}</strong>, 区块: ${event.blockNumber}</li>`;
+            });
+            
+            html += `</ul>`;
+            allowanceResultDiv.innerHTML = html;
+          } else {
+            allowanceResultDiv.innerHTML = "<p>未找到授权记录</p>";
+          }
+        } catch (error) {
+          allowanceResultDiv.innerHTML = `<p style="color:red">查询授权历史失败: ${error.message}</p>`;
+          console.error("查询EVM授权历史失败:", error);
+        }
+      } else if (detectedNetworkType === 'tron') {
+        if (!tronAccount) {
+          await connectTRONWallet();
+          if (!tronAccount) {
+            allowanceResultDiv.innerText = "请先连接TRON钱包";
+            return;
+          }
+        }
+        
+        try {
+          // TronWeb不直接提供事件查询，需要使用TRON API
+          allowanceResultDiv.innerHTML = "<p>正在查询TRON授权历史记录...</p>";
+          
+          const apiUrl = `https://apilist.tronscan.org/api/contract/events?contract=${tokenAddress}&event_name=Approval&ownAddr=${tronAccount}&limit=50`;
+          
+          // 使用fetch API替代Node.js代码中的请求
+          fetch(apiUrl)
+            .then(response => response.json())
+            .then(data => {
+              if (data && data.data && data.data.length > 0) {
+                let html = `<p>已找到 ${data.data.length} 条授权记录:</p><ul>`;
+                
+                data.data.forEach(event => {
+                  const spender = event.result._spender || event.result.spender;
+                  const value = event.result._value || event.result.value;
+                  const blockNumber = event.block;
+                  
+                  html += `<li>授权地址: <strong>${spender}</strong>, 授权额度: <strong>${value}</strong>, 区块: ${blockNumber}</li>`;
+                });
+                
+                html += `</ul>`;
+                allowanceResultDiv.innerHTML = html;
+              } else {
+                allowanceResultDiv.innerHTML = "<p>未找到授权记录</p>";
+              }
+            })
+            .catch(error => {
+              allowanceResultDiv.innerHTML = `<p style="color:red">查询TRON授权历史失败: ${error.message}</p>`;
+              console.error("查询TRON授权历史API失败:", error);
+            });
+        } catch (error) {
+          allowanceResultDiv.innerHTML = `<p style="color:red">查询TRON授权历史失败: ${error.message}</p>`;
+          console.error("查询TRON授权历史失败:", error);
+        }
+      } else {
+        allowanceResultDiv.innerText = "未检测到支持的网络环境";
       }
     });
   </script>
