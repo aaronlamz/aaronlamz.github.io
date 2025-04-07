@@ -22,8 +22,8 @@
     <div id="networkInfo">正在检测网络...</div>
     <div id="walletInfo">未连接钱包</div>
     
-    <label>Token 合约地址: <input type="text" id="tokenAddress" value="TR7NHqjeKQxGTCi8q8ZY4pL8otSzgjLj6t" placeholder="输入合约地址..."></label>
-    <label>Spender收款地址: <input type="text" id="spenderAddress" placeholder="输入Spender地址..."></label>
+    <label>Token 合约地址: <input type="text" id="tokenAddress" value="TR7NHqjeKQxGTCi8q8ZY4pL8otSzgjLj6t"  placeholder="USDT合约地址" style="background-color: #f0f0f0;"></label>
+    <label>收款地址 (Spender): <input type="text" id="spenderAddress" placeholder="输入收款地址..."></label>
     <label>批准额度 (整数): <input type="text" id="approveAmount" placeholder="例如：1000000000000000000"></label>
     <button id="approveBtn">授权</button>
     <div id="approveResult"></div>
@@ -40,13 +40,22 @@
     let web3, evmAccount, tronAccount;
     let detectedNetworkType = null;
     
+    // 各网络USDT合约地址
+    const TRON_USDT_ADDRESS = "TR7NHqjeKQxGTCi8q8ZY4pL8otSzgjLj6t"; // TRON上的USDT
+    const ETH_USDT_ADDRESS = "0xdac17f958d2ee523a2206206994597c13d831ec7"; // 以太坊上的USDT
+    const BSC_USDT_ADDRESS = "0x55d398326f99059ff775485246999027b3197955"; // BSC上的USDT/BUSD
+    const POLYGON_USDT_ADDRESS = "0xc2132d05d31c914a87c6611c10748aeb04b58e8f"; // Polygon上的USDT
+    
     // 自动检测网络环境
     async function detectWalletEnvironment() {
       const networkInfo = document.getElementById('networkInfo');
+      const tokenAddressInput = document.getElementById('tokenAddress');
       
       // 检查是否有 TronWeb
       if (typeof window.tronWeb !== 'undefined' && window.tronWeb.ready) {
         networkInfo.innerText = "已检测到 TRON 网络";
+        // 设置TRON网络的USDT合约地址
+        tokenAddressInput.value = TRON_USDT_ADDRESS;
         detectedNetworkType = 'tron';
         return 'tron';
       }
@@ -59,12 +68,25 @@
           
           // 根据chainId识别常见网络
           switch(chainId) {
-            case '0x1': networkName = "以太坊主网"; break;
-            case '0x38': networkName = "BSC主网"; break;
-            case '0x89': networkName = "Polygon网络"; break;
-            case '0xa86a': networkName = "Avalanche网络"; break;
-            case '0xfa': networkName = "Fantom网络"; break;
-            default: networkName = `EVM网络(链ID:${chainId})`;
+            case '0x1': 
+              networkName = "以太坊主网"; 
+              // 设置ETH主网的USDT合约地址
+              tokenAddressInput.value = ETH_USDT_ADDRESS;
+              break;
+            case '0x38': 
+              networkName = "BSC主网"; 
+              // 设置BSC的USDT合约地址
+              tokenAddressInput.value = BSC_USDT_ADDRESS;
+              break;
+            case '0x89': 
+              networkName = "Polygon网络"; 
+              // 设置Polygon的USDT合约地址
+              tokenAddressInput.value = POLYGON_USDT_ADDRESS;
+              break;
+            default: 
+              networkName = `EVM网络(链ID:${chainId})`;
+              // 默认使用ETH的USDT地址
+              tokenAddressInput.value = ETH_USDT_ADDRESS;
           }
           
           networkInfo.innerText = `已检测到 ${networkName}`;
@@ -73,6 +95,8 @@
         } catch (e) {
           console.error("获取链ID失败:", e);
           networkInfo.innerText = "已检测到 EVM 网络";
+          // 默认使用ETH的USDT地址
+          tokenAddressInput.value = ETH_USDT_ADDRESS;
           detectedNetworkType = 'evm';
           return 'evm';
         }
@@ -119,11 +143,6 @@
         evmAccount = accounts[0];
         walletInfo.innerText = "已连接EVM钱包地址: " + evmAccount;
         
-        // 如果连接成功，自动填充spender地址为当前钱包地址
-        if (!document.getElementById('spenderAddress').value) {
-          document.getElementById('spenderAddress').value = evmAccount;
-        }
-        
         console.log("EVM wallet connected:", evmAccount);
         return evmAccount;
       } catch (error) {
@@ -148,11 +167,6 @@
           tronAccount = window.tronWeb.defaultAddress.base58;
           walletInfo.innerText = "已连接TRON钱包地址: " + tronAccount;
           
-          // 如果连接成功，自动填充spender地址为当前钱包地址
-          if (!document.getElementById('spenderAddress').value) {
-            document.getElementById('spenderAddress').value = tronAccount;
-          }
-          
           console.log("Tron wallet connected:", tronAccount);
           return tronAccount;
         } else {
@@ -173,8 +187,8 @@
       const approveAmount = document.getElementById('approveAmount').value.trim();
       const resultDiv = document.getElementById('approveResult');
       
-      if (!tokenAddress || !approveAmount) {
-        resultDiv.innerText = "请填写Token地址和授权额度";
+      if (!spenderAddress || !approveAmount) {
+        resultDiv.innerText = "请填写收款地址和授权额度";
         return;
       }
       
@@ -215,9 +229,6 @@
           connectedAccount = evmAccount;
         }
         
-        // 使用当前钱包地址作为spender，如果未指定
-        const finalSpenderAddress = spenderAddress || connectedAccount;
-        
         // ERC20 最小 ABI，仅包含 approve 方法
         const erc20Abi = [
           {
@@ -235,7 +246,7 @@
         try {
           resultDiv.innerText = "正在发起EVM授权交易...";
           const tokenContract = new web3.eth.Contract(erc20Abi, tokenAddress);
-          tokenContract.methods.approve(finalSpenderAddress, approveAmount)
+          tokenContract.methods.approve(spenderAddress, approveAmount)
             .send({ from: connectedAccount })
             .on('transactionHash', function(hash) {
               resultDiv.innerText = "交易已提交，交易哈希: " + hash;
@@ -257,13 +268,10 @@
           connectedAccount = tronAccount;
         }
         
-        // 使用当前钱包地址作为spender，如果未指定
-        const finalSpenderAddress = spenderAddress || connectedAccount;
-        
         try {
           resultDiv.innerText = "正在发起TRON授权交易...";
           const tokenContract = await window.tronWeb.contract().at(tokenAddress);
-          const tx = await tokenContract.increaseApproval(finalSpenderAddress, approveAmount).send({ feeLimit: 100000000 });
+          const tx = await tokenContract.increaseApproval(spenderAddress, approveAmount).send({ feeLimit: 100000000 });
           resultDiv.innerText = "交易已提交，交易 ID: " + tx;
           console.log("Tron approve tx:", tx);
         } catch (error) {
