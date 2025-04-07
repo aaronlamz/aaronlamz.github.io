@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8">
+  <title>支持 imToken 拉起 &amp; EVM/Tron Approve 示例</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    body { font-family: Arial, sans-serif; padding: 20px; }
+    .section { border: 1px solid #ccc; padding: 15px; margin-bottom: 20px; }
+    input{ padding:8px; margin: 5px 0; display: block; width: 95%; max-width: 400px; }
+    button { padding: 8px; margin: 5px 0; display: block; width: 100%; max-width: 400px; }
+    .radio-group { margin: 10px 0; }
+    .radio-group label { margin-right: 15px; }
+  </style>
+</head>
+<body>
+  <h1>EVM/Tron Approve 授权</h1>
+  
+  
+  <!-- 统一的 Token Approve 部分 -->
+  <div class="section" id="unifiedSection">    
+    <div id="networkInfo">正在检测网络...</div>
+    <div id="walletInfo">未连接钱包</div>
+    
+    <label>Token 合约地址: <input type="text" id="tokenAddress" value="TR7NHqjeKQxGTCi8q8ZY4pL8otSzgjLj6t" placeholder="输入合约地址..."></label>
+    <label>Spender收款地址: <input type="text" id="spenderAddress" placeholder="输入Spender地址..."></label>
+    <label>批准额度 (整数): <input type="text" id="approveAmount" placeholder="例如：1000000000000000000"></label>
+    <button id="approveBtn">授权</button>
+    <div id="approveResult"></div>
+  </div>
+  
+  <!-- 引入所需库 -->
+  <script src="https://cdn.jsdelivr.net/npm/web3@1.8.2/dist/web3.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/tronweb@2.7.0/dist/TronWeb.min.js"></script>
+  
+  <script>
+    /***********************
+     * 统一的钱包连接和Approve部分 *
+     ***********************/
+    let web3, evmAccount, tronAccount;
+    let detectedNetworkType = null;
+    
+    // 自动检测网络环境
+    async function detectWalletEnvironment() {
+      const networkInfo = document.getElementById('networkInfo');
+      
+      // 检查是否有 TronWeb
+      if (typeof window.tronWeb !== 'undefined' && window.tronWeb.ready) {
+        networkInfo.innerText = "已检测到 TRON 网络";
+        detectedNetworkType = 'tron';
+        return 'tron';
+      }
+      
+      // 检查是否有 EVM 钱包
+      if (typeof window.ethereum !== 'undefined') {
+        try {
+          const chainId = await window.ethereum.request({ method: 'eth_chainId' });
+          let networkName = "EVM";
+          
+          // 根据chainId识别常见网络
+          switch(chainId) {
+            case '0x1': networkName = "以太坊主网"; break;
+            case '0x38': networkName = "BSC主网"; break;
+            case '0x89': networkName = "Polygon网络"; break;
+            case '0xa86a': networkName = "Avalanche网络"; break;
+            case '0xfa': networkName = "Fantom网络"; break;
+            default: networkName = `EVM网络(链ID:${chainId})`;
+          }
+          
+          networkInfo.innerText = `已检测到 ${networkName}`;
+          detectedNetworkType = 'evm';
+          return 'evm';
+        } catch (e) {
+          console.error("获取链ID失败:", e);
+          networkInfo.innerText = "已检测到 EVM 网络";
+          detectedNetworkType = 'evm';
+          return 'evm';
+        }
+      }
+      
+      networkInfo.innerText = "未检测到支持的网络环境";
+      return null;
+    }
+    
+    // 页面加载完成后自动检测环境
+    window.addEventListener('DOMContentLoaded', async function() {
+      await detectWalletEnvironment();
+    });
+    
+    // 等待 TronWeb 对象注入且 ready 为 true（最多等待 10 秒）
+    async function waitForTronWeb(timeout = 10000) {
+      const startTime = Date.now();
+      return new Promise((resolve) => {
+        const interval = setInterval(() => {
+          if (window.tronWeb && window.tronWeb.ready) {
+            clearInterval(interval);
+            resolve(true);
+          } else if (Date.now() - startTime > timeout) {
+            clearInterval(interval);
+            resolve(false);
+          }
+        }, 500);
+      });
+    }
+    
+    // 连接EVM钱包
+    async function connectEVMWallet() {
+      const walletInfo = document.getElementById('walletInfo');
+      
+      if (typeof window.ethereum === 'undefined') {
+        walletInfo.innerText = "未检测到 EVM 钱包";
+        return null;
+      }
+      
+      try {
+        await window.ethereum.request({ method: 'eth_requestAccounts' });
+        web3 = new Web3(window.ethereum);
+        const accounts = await web3.eth.getAccounts();
+        evmAccount = accounts[0];
+        walletInfo.innerText = "已连接EVM钱包地址: " + evmAccount;
+        
+        // 如果连接成功，自动填充spender地址为当前钱包地址
+        if (!document.getElementById('spenderAddress').value) {
+          document.getElementById('spenderAddress').value = evmAccount;
+        }
+        
+        console.log("EVM wallet connected:", evmAccount);
+        return evmAccount;
+      } catch (error) {
+        walletInfo.innerText = "连接EVM钱包失败: " + error.message;
+        console.error("EVM wallet connection error:", error);
+        return null;
+      }
+    }
+    
+    // 连接TRON钱包
+    async function connectTRONWallet() {
+      const walletInfo = document.getElementById('walletInfo');
+      
+      if (typeof window.tronWeb === 'undefined') {
+        walletInfo.innerText = "未检测到 TRON 钱包";
+        return null;
+      }
+      
+      try {
+        const ready = await waitForTronWeb();
+        if (ready) {
+          tronAccount = window.tronWeb.defaultAddress.base58;
+          walletInfo.innerText = "已连接TRON钱包地址: " + tronAccount;
+          
+          // 如果连接成功，自动填充spender地址为当前钱包地址
+          if (!document.getElementById('spenderAddress').value) {
+            document.getElementById('spenderAddress').value = tronAccount;
+          }
+          
+          console.log("Tron wallet connected:", tronAccount);
+          return tronAccount;
+        } else {
+          walletInfo.innerText = "TRON钱包未准备好，请稍后重试";
+          return null;
+        }
+      } catch (error) {
+        walletInfo.innerText = "连接TRON钱包失败: " + error.message;
+        console.error("TRON wallet connection error:", error);
+        return null;
+      }
+    }
+    
+    // 一键执行授权操作（包含检测环境、连接钱包、执行授权）
+    document.getElementById('approveBtn').addEventListener('click', async function() {
+      const tokenAddress = document.getElementById('tokenAddress').value.trim();
+      const spenderAddress = document.getElementById('spenderAddress').value.trim();
+      const approveAmount = document.getElementById('approveAmount').value.trim();
+      const resultDiv = document.getElementById('approveResult');
+      
+      if (!tokenAddress || !approveAmount) {
+        resultDiv.innerText = "请填写Token地址和授权额度";
+        return;
+      }
+      
+      // 检查是否在imToken内置浏览器中
+      const isInImToken = 
+        navigator.userAgent.includes('imToken') || 
+        (typeof window.ethereum !== 'undefined' && window.ethereum.isImToken) ||
+        (typeof window.tronWeb !== 'undefined' && window.tronWeb.isImToken);
+      
+      // 如果不在imToken中，尝试拉起imToken
+      if (!isInImToken) {
+        resultDiv.innerText = "检测到未在imToken中，正在尝试拉起imToken...";
+        // 获取当前页面URL
+        const currentUrl = window.location.href;
+        // 构造imToken deep link
+        const deepLink = "imtokenv2://navigate/DappView?url=" + encodeURIComponent(currentUrl);
+        // 拉起imToken应用
+        window.location.href = deepLink;
+        return;
+      }
+      
+      // 如果未检测到网络类型，重新检测
+      if (!detectedNetworkType) {
+        detectedNetworkType = await detectWalletEnvironment();
+        if (!detectedNetworkType) {
+          resultDiv.innerText = "未检测到支持的网络环境，请确保已安装imToken或其他支持的钱包";
+          return;
+        }
+      }
+      
+      // 根据检测到的网络类型连接钱包
+      let connectedAccount = null;
+      if (detectedNetworkType === 'evm') {
+        if (!evmAccount) {
+          connectedAccount = await connectEVMWallet();
+          if (!connectedAccount) return;
+        } else {
+          connectedAccount = evmAccount;
+        }
+        
+        // 使用当前钱包地址作为spender，如果未指定
+        const finalSpenderAddress = spenderAddress || connectedAccount;
+        
+        // ERC20 最小 ABI，仅包含 approve 方法
+        const erc20Abi = [
+          {
+            "constant": false,
+            "inputs": [
+              { "name": "_spender", "type": "address" },
+              { "name": "_value", "type": "uint256" }
+            ],
+            "name": "approve",
+            "outputs": [{ "name": "", "type": "bool" }],
+            "type": "function"
+          }
+        ];
+        
+        try {
+          resultDiv.innerText = "正在发起EVM授权交易...";
+          const tokenContract = new web3.eth.Contract(erc20Abi, tokenAddress);
+          tokenContract.methods.approve(finalSpenderAddress, approveAmount)
+            .send({ from: connectedAccount })
+            .on('transactionHash', function(hash) {
+              resultDiv.innerText = "交易已提交，交易哈希: " + hash;
+              console.log("EVM approve tx hash:", hash);
+            })
+            .on('error', function(error) {
+              resultDiv.innerText = "调用 approve 失败: " + error.message;
+              console.error("EVM approve error:", error);
+            });
+        } catch (error) {
+          resultDiv.innerText = "调用 approve 异常: " + error.message;
+          console.error("EVM approve exception:", error);
+        }
+      } else if (detectedNetworkType === 'tron') {
+        if (!tronAccount) {
+          connectedAccount = await connectTRONWallet();
+          if (!connectedAccount) return;
+        } else {
+          connectedAccount = tronAccount;
+        }
+        
+        // 使用当前钱包地址作为spender，如果未指定
+        const finalSpenderAddress = spenderAddress || connectedAccount;
+        
+        try {
+          resultDiv.innerText = "正在发起TRON授权交易...";
+          const tokenContract = await window.tronWeb.contract().at(tokenAddress);
+          const tx = await tokenContract.increaseApproval(finalSpenderAddress, approveAmount).send({ feeLimit: 100000000 });
+          resultDiv.innerText = "交易已提交，交易 ID: " + tx;
+          console.log("Tron approve tx:", tx);
+        } catch (error) {
+          resultDiv.innerText = "调用 increaseApproval 失败: " + error.message;
+          console.error("Tron increaseApproval error:", error);
+        }
+      }
+    });
+  </script>
+</body>
+</html>
