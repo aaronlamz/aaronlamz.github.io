@@ -485,11 +485,8 @@
           allowanceResultDiv.innerHTML = "<p>正在使用TronWeb直接查询授权历史记录...</p>";
           
           try {
-            const tronWeb = new TronWeb({
-              fullHost: 'https://api.trongrid.io',
-            });
             // 使用用户提供的方法
-            if (typeof tronWeb.getEventByContractAddress === 'function') {
+            if (typeof window.tronWeb.getEventByContractAddress === 'function') {
               const events = await window.tronWeb.getEventByContractAddress(tokenAddress, {
                 eventName: 'Approval',
                 filters: { owner: tronAccount },
@@ -554,148 +551,121 @@
             allowanceResultDiv.innerHTML += `<p>直接查询失败: ${directError.message}，尝试其他方法...</p>`;
           }
           
-          // 尝试使用合约的allowance方法查询当前授权
-          try {
-            const contract = await window.tronWeb.contract().at(tokenAddress);
-            
-            // 显示当前授权信息
-            allowanceResultDiv.innerHTML += "<p>查询当前授权信息中...</p>";
-            const spenderAddress = document.getElementById('spenderAddress').value.trim();
-            
-            if (spenderAddress) {
-              const allowance = await contract.allowance(tronAccount, spenderAddress).call();
-              allowanceResultDiv.innerHTML += `<p>当前对地址 <strong>${spenderAddress}</strong> 的授权额度: <strong>${allowance}</strong></p>`;
+          // 尝试使用更可靠的方法：Trongrid API
+          allowanceResultDiv.innerHTML += "<p>正在从Trongrid查询授权历史...</p>";
+          
+          // 替代API地址
+          const apiUrl = `https://api.trongrid.io/v1/contracts/${tokenAddress}/events?event_name=Approval&block_number=&only_confirmed=true&order_by=block_timestamp,desc&limit=50`;
+          
+          // 调用API前，添加尝试备用方法的链接
+          allowanceResultDiv.innerHTML += `<p><a href="https://tronscan.org/#/address/${tronAccount}/transactions" target="_blank">无法查看历史记录？点击这里在TronScan上查看所有交易</a></p>`;
+          
+          // 发起API请求（注意：公共API可能会有跨域限制或访问限制）
+          fetch(apiUrl, {
+            method: 'GET',
+            headers: {
+              'Content-Type': 'application/json',
+              'TRON-PRO-API-KEY': 'your-api-key-here' // 用户需要替换成自己的API密钥才能获得更高的请求配额
             }
-            
-            // 尝试使用更可靠的方法：Trongrid API
-            allowanceResultDiv.innerHTML += "<p>正在从Trongrid查询授权历史...</p>";
-            
-            // 替代API地址
-            const apiUrl = `https://api.trongrid.io/v1/contracts/${tokenAddress}/events?event_name=Approval&block_number=&only_confirmed=true&order_by=block_timestamp,desc&limit=50`;
-            
-            // 调用API前，添加尝试备用方法的链接
-            allowanceResultDiv.innerHTML += `<p><a href="https://tronscan.org/#/address/${tronAccount}/transactions" target="_blank">无法查看历史记录？点击这里在TronScan上查看所有交易</a></p>`;
-            
-            // 发起API请求（注意：公共API可能会有跨域限制或访问限制）
-            fetch(apiUrl)
-              .then(response => {
-                if (!response.ok) {
-                  throw new Error(`API请求失败: ${response.status}`);
-                }
-                return response.json();
-              })
-              .then(data => {
-                console.log("API返回数据:", data); // 调试用
+          })
+            .then(response => {
+              if (!response.ok) {
+                throw new Error(`API请求失败: ${response.status}`);
+              }
+              return response.json();
+            })
+            .then(data => {
+              console.log("API返回数据:", data); // 调试用
+              
+              if (data && data.data && data.data.length > 0) {
+                // 过滤出当前用户相关的授权事件
+                const userEvents = data.data.filter(event => {
+                  // 尝试从不同格式中提取所有者地址
+                  let eventOwner = null;
+                  
+                  if (event.result && event.result.owner) {
+                    eventOwner = event.result.owner;
+                  } else if (event.result && event.result._owner) {
+                    eventOwner = event.result._owner;
+                  } else if (event.parameter && event.parameter._owner) {
+                    eventOwner = event.parameter._owner;
+                  }
+                  
+                  // 转换地址格式进行比较
+                  try {
+                    if (!eventOwner) return false;
+                    
+                    // 处理各种可能的地址格式
+                    let normalizedAddress;
+                    if (eventOwner.startsWith('41')) {
+                      normalizedAddress = window.tronWeb.address.fromHex(eventOwner);
+                    } else if (eventOwner.startsWith('0x')) {
+                      normalizedAddress = window.tronWeb.address.fromHex('41' + eventOwner.slice(2));
+                    } else {
+                      normalizedAddress = eventOwner;
+                    }
+                    
+                    return normalizedAddress === tronAccount;
+                  } catch (e) {
+                    console.error("地址转换错误:", e);
+                    return false;
+                  }
+                });
                 
-                if (data && data.data && data.data.length > 0) {
-                  // 过滤出当前用户相关的授权事件
-                  const userEvents = data.data.filter(event => {
-                    // 尝试从不同格式中提取所有者地址
-                    let eventOwner = null;
+                if (userEvents.length > 0) {
+                  let html = `<p>已找到 ${userEvents.length} 条授权记录:</p><ul>`;
+                  
+                  userEvents.forEach(event => {
+                    // 使用更健壮的数据提取方法
+                    let spender = "未知地址";
+                    let value = "未知额度";
+                    let timestamp = new Date(event.block_timestamp || 0).toLocaleString();
                     
-                    if (event.result && event.result.owner) {
-                      eventOwner = event.result.owner;
-                    } else if (event.result && event._owner) {
-                      eventOwner = event.result._owner;
-                    } else if (event.parameter && event.parameter._owner) {
-                      eventOwner = event.parameter._owner;
-                    }
-                    
-                    // 转换地址格式进行比较
                     try {
-                      const normalizedAddress = window.tronWeb.address.fromHex(eventOwner);
-                      return normalizedAddress === tronAccount;
+                      if (event.result) {
+                        // 尝试获取spender地址
+                        if (event.result.spender) {
+                          spender = window.tronWeb.address.fromHex(event.result.spender);
+                        } else if (event.result._spender) {
+                          spender = window.tronWeb.address.fromHex(event.result._spender);
+                        }
+                        
+                        // 尝试获取授权值
+                        value = event.result.value || event.result._value || event.result.amount || "0";
+                      }
                     } catch (e) {
-                      return false;
+                      console.error("解析事件数据失败", e);
                     }
+                    
+                    html += `<li>
+                            授权地址: <strong>${spender}</strong><br>
+                            授权额度: <strong>${value}</strong><br>
+                            时间: ${timestamp}
+                           </li>`;
                   });
                   
-                  if (userEvents.length > 0) {
-                    let html = `<p>已找到 ${userEvents.length} 条授权记录:</p><ul>`;
-                    
-                    userEvents.forEach(event => {
-                      // 使用更健壮的数据提取方法
-                      let spender = "未知地址";
-                      let value = "未知额度";
-                      let timestamp = new Date(event.block_timestamp || 0).toLocaleString();
-                      
-                      try {
-                        if (event.result) {
-                          // 尝试获取spender地址
-                          if (event.result.spender) {
-                            spender = window.tronWeb.address.fromHex(event.result.spender);
-                          } else if (event.result._spender) {
-                            spender = window.tronWeb.address.fromHex(event.result._spender);
-                          }
-                          
-                          // 尝试获取授权值
-                          value = event.result.value || event.result._value || event.result.amount || "0";
-                        }
-                      } catch (e) {
-                        console.error("解析事件数据失败", e);
-                      }
-                      
-                      html += `<li>
-                              授权地址: <strong>${spender}</strong><br>
-                              授权额度: <strong>${value}</strong><br>
-                              时间: ${timestamp}
-                             </li>`;
-                    });
-                    
-                    html += `</ul>`;
-                    allowanceResultDiv.innerHTML += html;
-                  } else {
-                    allowanceResultDiv.innerHTML += "<p>未找到与当前账户相关的授权记录</p>";
-                  }
-                } else {
-                  allowanceResultDiv.innerHTML += "<p>未找到授权记录</p>";
-                }
-              })
-              .catch(error => {
-                console.error("API请求失败:", error);
-                allowanceResultDiv.innerHTML += `<p style="color:red">API请求失败: ${error.message}</p>`;
-                
-                // 提供替代方案
-                allowanceResultDiv.innerHTML += `
-                  <p>无法通过API获取授权历史。您可以：</p>
-                  <ol>
-                    <li>在<a href="https://tronscan.org/#/address/${tronAccount}" target="_blank">TronScan</a>上查看您的所有交易</li>
-                    <li>仅查询当前授权额度（上面已显示）</li>
-                  </ol>
-                `;
-              });
-          } catch (innerError) {
-            console.error("TronWeb合约调用失败:", innerError);
-            
-            // 回退到原来的方法
-            allowanceResultDiv.innerHTML += `<p>尝试使用备用方法查询...</p>`;
-            
-            const apiUrl = `https://apilist.tronscan.org/api/contract/events?contract=${tokenAddress}&event_name=Approval&ownAddr=${tronAccount}&limit=50`;
-           
-            // 使用备用API方法
-            fetch(apiUrl)
-              .then(response => response.json())
-              .then(data => {
-                console.log("备用API返回数据:", data);
-                if (data && data.data && data.data.length > 0) {
-                  let html = `<p>已找到 ${data.data.length} 条授权记录:</p>`;
-                  html += `<p style="color:blue">提示：正在尝试解析数据，如格式不正确可能无法显示完整内容</p>`;
-                  html += `<pre style="overflow:auto; max-height:200px; font-size:10px; background:#f5f5f5; padding:5px;">${JSON.stringify(data.data, null, 2)}</pre>`;
+                  html += `</ul>`;
                   allowanceResultDiv.innerHTML += html;
                 } else {
-                  allowanceResultDiv.innerHTML += "<p>备用API未找到授权记录</p>";
+                  allowanceResultDiv.innerHTML += "<p>未找到与当前账户相关的授权记录</p>";
                 }
-              })
-              .catch(backupError => {
-                allowanceResultDiv.innerHTML += `<p style="color:red">备用API也查询失败: ${backupError.message}</p>`;
-                console.error("备用API查询失败:", backupError);
-                
-                // 最终回退选项
-                allowanceResultDiv.innerHTML += `
-                  <p>您可以直接在<a href="https://tronscan.org/#/address/${tronAccount}" target="_blank">TronScan</a>上查看您的所有交易</p>
-                `;
-              });
-          }
+              } else {
+                allowanceResultDiv.innerHTML += "<p>未找到授权记录</p>";
+              }
+            })
+            .catch(error => {
+              console.error("API请求失败:", error);
+              allowanceResultDiv.innerHTML += `<p style="color:red">API请求失败: ${error.message}</p>`;
+              
+              // 提供替代方案
+              allowanceResultDiv.innerHTML += `
+                <p>无法通过API获取授权历史。您可以：</p>
+                <ol>
+                  <li>在<a href="https://tronscan.org/#/address/${tronAccount}" target="_blank">TronScan</a>上查看您的所有交易</li>
+                  <li>仅查询当前授权额度（上面已显示）</li>
+                </ol>
+              `;
+            });
         } catch (error) {
           allowanceResultDiv.innerHTML = `<p style="color:red">查询TRON授权历史失败: ${error.message}</p>`;
           console.error("查询TRON授权历史失败:", error);
