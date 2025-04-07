@@ -444,20 +444,87 @@
         }
         
         try {
-          // TronWeb不直接提供事件查询，需要使用TRON API
-          allowanceResultDiv.innerHTML = "<p>正在查询TRON授权历史记录...</p>";
+          // 添加新的方法: 使用tronWeb.getEventByContractAddress
+          allowanceResultDiv.innerHTML = "<p>正在使用TronWeb直接查询授权历史记录...</p>";
           
-          // 先尝试使用TronWeb自带的API查询
+          try {
+            // 使用用户提供的方法
+            if (typeof window.tronWeb.getEventByContractAddress === 'function') {
+              const events = await window.tronWeb.getEventByContractAddress(tokenAddress, {
+                eventName: 'Approval',
+                filters: { owner: tronAccount },
+                blockNumber: 'earliest', // 从最早区块开始查询
+                size: 50 // 限制返回数量
+              });
+              
+              console.log("直接通过TronWeb查询的事件:", events);
+              
+              if (events && events.length > 0) {
+                let html = `<p>通过TronWeb API找到 ${events.length} 条授权记录:</p><ul>`;
+                
+                events.forEach(event => {
+                  // 解析事件数据
+                  let spender = "未知地址";
+                  let value = "未知额度";
+                  let timestamp = new Date(event.timestamp || 0).toLocaleString();
+                  let blockNumber = event.blockNumber || "未知区块";
+                  
+                  try {
+                    if (event.result) {
+                      // 尝试获取spender地址
+                      if (event.result.spender) {
+                        spender = event.result.spender;
+                      } else if (event.result._spender) {
+                        spender = event.result._spender;
+                      }
+                      
+                      // 尝试从Hex转换为Base58地址
+                      if (spender.startsWith('0x') || spender.startsWith('41')) {
+                        try {
+                          spender = window.tronWeb.address.fromHex(spender);
+                        } catch (e) {}
+                      }
+                      
+                      // 尝试获取授权值
+                      value = event.result.value || event.result._value || event.result.amount || "0";
+                    }
+                  } catch (e) {
+                    console.error("解析事件数据失败", e);
+                  }
+                  
+                  html += `<li>
+                          授权地址: <strong>${spender}</strong><br>
+                          授权额度: <strong>${value}</strong><br>
+                          区块: ${blockNumber}<br>
+                          时间: ${timestamp}
+                         </li>`;
+                });
+                
+                html += `</ul>`;
+                allowanceResultDiv.innerHTML = html;
+                return; // 成功获取数据，不需要尝试其他方法
+              } else {
+                allowanceResultDiv.innerHTML += "<p>未通过TronWeb API找到授权记录，尝试其他方法...</p>";
+              }
+            } else {
+              allowanceResultDiv.innerHTML += "<p>您的TronWeb版本不支持直接查询事件，尝试其他方法...</p>";
+            }
+          } catch (directError) {
+            console.error("直接使用TronWeb查询事件失败:", directError);
+            allowanceResultDiv.innerHTML += `<p>直接查询失败: ${directError.message}，尝试其他方法...</p>`;
+          }
+          
+          // 尝试使用合约的allowance方法查询当前授权
           try {
             const contract = await window.tronWeb.contract().at(tokenAddress);
             
             // 显示当前授权信息
-            allowanceResultDiv.innerHTML = "<p>查询当前授权信息中...</p>";
+            allowanceResultDiv.innerHTML += "<p>查询当前授权信息中...</p>";
             const spenderAddress = document.getElementById('spenderAddress').value.trim();
             
             if (spenderAddress) {
               const allowance = await contract.allowance(tronAccount, spenderAddress).call();
-              allowanceResultDiv.innerHTML = `<p>当前对地址 <strong>${spenderAddress}</strong> 的授权额度: <strong>${allowance}</strong></p>`;
+              allowanceResultDiv.innerHTML += `<p>当前对地址 <strong>${spenderAddress}</strong> 的授权额度: <strong>${allowance}</strong></p>`;
             }
             
             // 尝试使用更可靠的方法：Trongrid API
