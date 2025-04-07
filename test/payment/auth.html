@@ -485,8 +485,11 @@
           allowanceResultDiv.innerHTML = "<p>正在使用TronWeb直接查询授权历史记录...</p>";
           
           try {
+            const tronWeb = new TronWeb({
+              fullHost: 'https://api.trongrid.io',
+            });
             // 使用用户提供的方法
-            if (typeof window.tronWeb.getEventByContractAddress === 'function') {
+            if (typeof tronWeb.getEventByContractAddress === 'function') {
               const events = await window.tronWeb.getEventByContractAddress(tokenAddress, {
                 eventName: 'Approval',
                 filters: { owner: tronAccount },
